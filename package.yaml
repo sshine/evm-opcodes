@@ -1,0 +1,40 @@
+name:        hs-evm-opcodes
+version:     0.1.0
+
+synopsis:    'Opcode types for Ethereum Virtual Machine (EVM)'
+description: 'This library provides opcode types for the Ethereum Virtual Machine.'
+category:    Ethereum, Finance, Network
+license:     MIT
+
+homepage:    https://github.com/sshine/evm-opcodes
+author:      Simon Shine
+maintainer:  shreddedglory@gmail.com
+copyright:   2020 Simon Shine
+
+extra-source-files:
+  - README.md
+
+dependencies:
+  - base
+  - text
+  - largeword
+  - containers
+  - mtl
+
+library:
+  exposed-modules:
+    - Data.TinyWord
+  source-dirs: src
+
+tests:
+  test:
+    main: test.hs
+    source-dirs: test
+    dependencies:
+      - hs-evm-opcodes
+      - tasty
+      - tasty-discover
+      - tasty-hspec
+      - tasty-hedgehog
+      - hedgehog
+      - hspec

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b84f9943fa6052ba35f618880139251b4a1eb6f562c45ece6cf356eb2251f7cc
+-- hash: fbddecd153fe7220f18bc4edb01776e1d023984730dd402ed1c2064afd1befee
 
 name:           hs-evm-opcodes
 version:        0.1.0
@@ -43,6 +43,8 @@ test-suite test
   type: exitcode-stdio-1.0
   main-is: test.hs
   other-modules:
+      OpcodeGenerators
+      OpcodeTest
       Paths_hs_evm_opcodes
   hs-source-dirs:
       test

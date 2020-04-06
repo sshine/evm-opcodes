@@ -291,4 +291,4 @@ ppHex opcode = T.pack $ printf "%02x" . _opcodeEncoding . opcodeSpec $ opcode
 push' :: Word256 -> (Word8, [Word8])
 push' i | i < 256 = (0x60, [fromIntegral i])
 push' i = (opcode + 1, arg <> [fromIntegral i])
-  where (opcode, arg) = push' (i `div` 256)
+  where (opcode, arg) = push' (i `quot` 256)

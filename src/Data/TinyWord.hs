@@ -7,7 +7,10 @@
 --
 -- This module exports two types, `Word2` and `Word4`, as wrappers around `Word8`.
 
-module Data.TinyWord where
+module Data.TinyWord
+  ( Word2, Word4
+  , word2, word4
+  ) where
 
 import Data.Bits
 import Data.Word
@@ -37,9 +40,9 @@ instance Bounded Word4 where
   maxBound = Word4 0x0f
 
 instance Enum Word2 where
-  succ (Word2 x) = if x < 0x0f then Word2 (succ x) else succError "Word2"
+  succ (Word2 x) = if x < 0x03 then Word2 (succ x) else succError "Word2"
   pred (Word2 x) = if x > 0x00 then Word2 (pred x) else predError "Word2"
-  toEnum i | 0x00 <= i && i <= 0x0f = Word2 (toEnum i)
+  toEnum i | 0x00 <= i && i <= 0x03 = Word2 (toEnum i)
   toEnum i = toEnumError "Word2" i (minBound :: Word2, maxBound :: Word2)
   fromEnum = fromEnum . unWord2
   enumFrom = boundedEnumFrom
@@ -59,18 +62,18 @@ instance Enum Word4 where
   enumFromThenTo (Word4 x) (Word4 y) (Word4 z) = map Word4 (enumFromThenTo x y z)
 
 instance Num Word2 where
-  Word2 x + Word2 y = Word2 $ x + y
-  Word2 x * Word2 y = Word2 $ x * y
-  Word2 x - Word2 y = Word2 $ x - y
+  Word2 x + Word2 y = word2 $ x + y
+  Word2 x * Word2 y = word2 $ x * y
+  Word2 x - Word2 y = word2 $ x - y
   negate (Word2 x) = Word2 (negate x)
   abs = id
   signum (Word2 x) = Word2 (if x == 0 then 0 else 1)
   fromInteger = word2 . fromInteger
 
 instance Num Word4 where
-  Word4 x + Word4 y = Word4 $ x + y
-  Word4 x * Word4 y = Word4 $ x * y
-  Word4 x - Word4 y = Word4 $ x - y
+  Word4 x + Word4 y = word4 $ x + y
+  Word4 x * Word4 y = word4 $ x * y
+  Word4 x - Word4 y = word4 $ x - y
   negate (Word4 x) = Word4 (negate x)
   abs = id
   signum (Word4 x) = Word4 (if x == 0 then 0 else 1)

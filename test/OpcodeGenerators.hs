@@ -3,6 +3,9 @@ module OpcodeGenerators where
 
 import Prelude hiding (LT, EQ, GT)
 
+import           Data.Text (Text)
+import qualified Data.Text as Text
+
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
@@ -11,7 +14,8 @@ import Data.TinyWord (Word2, Word4)
 import Data.LargeWord (Word256)
 import Network.Ethereum.Evm.Opcode
 import Network.Ethereum.Evm.PositionedOpcode
---import Network.Ethereum.Evm.LabelledOpcode
+import Network.Ethereum.Evm.LabelledOpcode
+import Network.Ethereum.Evm.OpcodeTraversals
 
 -- | Generate a jump-free `Opcode` with zero arity.
 genOpcode0 :: Gen (AbstractOpcode a)
@@ -37,25 +41,37 @@ genOpcode1 = Gen.choice
 genPushOpcode :: Gen (AbstractOpcode a)
 genPushOpcode = PUSH <$> genWord256
 
-genPushOpcode' :: Gen (Int, AbstractOpcode a)
-genPushOpcode' = do
-  (n, k) <- genWord256'
-  pure (1 + n, PUSH k)
-
-genPosJumpOpcode :: Gen PositionedOpcode
-genPosJumpOpcode = Gen.choice
+genPositionalJump :: Gen PositionedOpcode
+genPositionalJump = Gen.choice
   [ JUMP <$> genWord256
   , JUMPI <$> genWord256
   , JUMPDEST <$> genWord256
   ]
 
--- Generate `PositionalOpcode` with arbitrary jumps.
-genPosOpcode :: Gen PositionedOpcode
-genPosOpcode = Gen.frequency
+genLabelledOpcodes :: Gen [LabelledOpcode]
+genLabelledOpcodes = do
+  opcodes <- Gen.list Range.linearBounded genLabelledOpcode
+  let labels = JUMPDEST <$> foldMap extractLabel opcodes
+  Gen.shuffle (opcodes <> labels)
+  where
+    extractLabel :: LabelledOpcode -> [Label]
+    extractLabel (JUMP label) = [label]
+    extractLabel (JUMPI label) = [label]
+    extractLabel _ = []
+
+-- | Generate a `LabelledOpcode` that isn't JUMPDEST.
+genLabelledOpcode :: Gen LabelledOpcode
+genLabelledOpcode = Gen.frequency
   [ (1, genPushOpcode)
-  , (1, genPosJumpOpcode)
+  , (1, genLabelledJump)
   , (3, genOpcode0)
   ]
+
+genLabelledJump :: Gen LabelledOpcode
+genLabelledJump = Gen.choice [ JUMP <$> genLabel, JUMPI <$> genLabel ]
+
+genLabel :: Gen Text
+genLabel = Gen.text (Range.singleton 4) (Gen.element "xyz")
 
 -- | Generate a Word of size N.
 genWordN :: (MonadGen m, Integral w, Bounded w) => m w
@@ -72,8 +88,8 @@ genWord256 = snd <$> genWord256'
 -- | Generate a byte size and a `Word256` of that byte size.
 genWord256' :: Gen (Int, Word256)
 genWord256' = do
-  bytes <- Gen.integral (Range.linear 0 31)
-  let lo = 2 ^ (8 * bytes)
-      hi = 2 ^ (8 * (bytes + 1))
-  k <- Gen.integral_ (Range.constant lo hi)
-  pure (bytes, k - 1)
+  bytes <- Gen.integral (Range.linear 1 32)
+  let lo = 2 ^ (8 * (bytes - 1))
+      hi = 2 ^ (8 * bytes)
+  k <- pred <$> Gen.integral_ (Range.constant lo hi)
+  pure (bytes, k)

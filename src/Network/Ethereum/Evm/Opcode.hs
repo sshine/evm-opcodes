@@ -269,8 +269,13 @@ opcodeText :: Opcode -> Text
 opcodeText = _opcodeName . opcodeSpec
 
 -- | Show `Opcode` as `String`.
-instance Show Opcode where
-  show = T.unpack . opcodeText
+instance Show a => Show (AbstractOpcode a) where
+  show opcode = T.unpack (opcodeText (concrete opcode)) <> show' opcode
+    where
+      show' (JUMP a) = " " <> show a
+      show' (JUMPI a) = " " <> show a
+      show' (JUMPDEST a) = " " <> show a
+      show' opcode = ""
 
 -- | Calculate the size in bytes of an encoded opcode. The only `Opcode`
 -- that uses more than one byte is `PUSH`. Sizes are trivially determined

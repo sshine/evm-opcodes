@@ -19,24 +19,26 @@ import Network.Ethereum.Evm.OpcodeTraversals
 
 -- | Generate a jump-free `Opcode` with zero arity.
 genOpcode0 :: Gen (AbstractOpcode a)
-genOpcode0 = Gen.element
-  [ STOP, ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, ADDMOD, MULMOD, EXP, SIGNEXTEND
-  , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE
-  , SHA3
-  , ADDRESS, BALANCE, ORIGIN, CALLER, CALLVALUE, CALLDATALOAD, CALLDATASIZE, CALLDATACOPY, CODESIZE, CODECOPY, GASPRICE, EXTCODESIZE, EXTCODECOPY
-  , BLOCKHASH, COINBASE, TIMESTAMP, NUMBER, DIFFICULTY, GASLIMIT
-  , POP, MLOAD, MSTORE, MSTORE8, SLOAD, SSTORE {- , JUMP, JUMPI -}, PC, MSIZE, GAS {- , JUMPDEST -}
-    {- , PUSH, DUP, SWAP, LOG -}
-  , CREATE, CALL, CALLCODE, RETURN, DELEGATECALL, SUICIDE
+genOpcode0 = Gen.frequency
+  [ (length opcode0, Gen.element opcode0)
+  , (length opcode1, Gen.choice opcode1)
   ]
-
--- | Generate a jump-free `Opcode` with arity 1, size 1.
-genOpcode1 :: Gen (AbstractOpcode a)
-genOpcode1 = Gen.choice
-  [ DUP <$> genWordN
-  , SWAP <$> genWordN
-  , LOG <$> genWordN
-  ]
+  where
+    opcode0 =
+      [ STOP, ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, ADDMOD, MULMOD, EXP, SIGNEXTEND
+      , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE
+      , SHA3
+      , ADDRESS, BALANCE, ORIGIN, CALLER, CALLVALUE, CALLDATALOAD, CALLDATASIZE, CALLDATACOPY, CODESIZE, CODECOPY, GASPRICE, EXTCODESIZE, EXTCODECOPY
+      , BLOCKHASH, COINBASE, TIMESTAMP, NUMBER, DIFFICULTY, GASLIMIT
+      , POP, MLOAD, MSTORE, MSTORE8, SLOAD, SSTORE {- , JUMP, JUMPI -}, PC, MSIZE, GAS {- , JUMPDEST -}
+        {- , PUSH, DUP, SWAP, LOG -}
+      , CREATE, CALL, CALLCODE, RETURN, DELEGATECALL, SUICIDE
+      ]
+    opcode1 =
+      [ DUP <$> genWordN
+      , SWAP <$> genWordN
+      , LOG <$> genWordN
+      ]
 
 genPushOpcode :: Gen (AbstractOpcode a)
 genPushOpcode = PUSH <$> genWord256
@@ -48,11 +50,12 @@ genPositionalJump = Gen.choice
   , JUMPDEST <$> genWord256
   ]
 
+-- | Generate a list of `LabelledOpcode` where all JUMP/JUMPI have a JUMPDEST.
 genLabelledOpcodes :: Gen [LabelledOpcode]
 genLabelledOpcodes = do
-  opcodes <- Gen.list Range.linearBounded genLabelledOpcode
-  let labels = JUMPDEST <$> foldMap extractLabel opcodes
-  Gen.shuffle (opcodes <> labels)
+  opcodes <- Gen.list (Range.linear 0 40) genLabelledOpcode
+  let jumpdests = JUMPDEST <$> foldMap extractLabel opcodes
+  Gen.shuffle (opcodes <> jumpdests)
   where
     extractLabel :: LabelledOpcode -> [Label]
     extractLabel (JUMP label) = [label]
@@ -71,7 +74,7 @@ genLabelledJump :: Gen LabelledOpcode
 genLabelledJump = Gen.choice [ JUMP <$> genLabel, JUMPI <$> genLabel ]
 
 genLabel :: Gen Text
-genLabel = Gen.text (Range.singleton 4) (Gen.element "xyz")
+genLabel = Gen.text (Range.singleton 3) (Gen.element "xyz")
 
 -- | Generate a Word of size N.
 genWordN :: (MonadGen m, Integral w, Bounded w) => m w

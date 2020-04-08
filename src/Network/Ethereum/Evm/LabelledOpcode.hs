@@ -19,7 +19,12 @@
 -- With `LabelledOpcode` one can express named labels and not worry about
 -- calculating the positions of labels until a late stage.
 
-module Network.Ethereum.Evm.LabelledOpcode where
+module Network.Ethereum.Evm.LabelledOpcode
+  ( Label
+  , LabelledOpcode
+  , TranslateError(..)
+  , translate
+  ) where
 
 import Data.List (null, filter, group, sort)
 import Data.Text (Text)

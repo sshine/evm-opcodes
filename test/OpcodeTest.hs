@@ -40,11 +40,15 @@ hprop_opcodeSize_and_opcodeText_for_PUSH_has_size_N_plus_1 = property $ do
 hprop_translate_LabelledOpcode :: Property
 hprop_translate_LabelledOpcode = property $ do
   labelledOpcodes <- forAll genLabelledOpcodes
+
+  -- Property: Every address jumped to occurs at least once translates correctly.
   positionedOpcodes <- evalEither (L.translate labelledOpcodes)
 
   -- Property: The translated code has JUMP, JUMPI and JUMPDEST in the same places.
   for_ (zip labelledOpcodes positionedOpcodes) $ \(lop, pop) ->
     Opcode.concrete lop === Opcode.concrete pop
 
-  -- Property: Code where every address being jumped to occurs at least once translates correctly.
   -- Property: For every translated, positional jump, the corresponding index is a JUMPDEST.
+
+  -- Property: JUMP/JUMPI near to a border (e.g. 254, 255, 256, 257) works.
+  -- Depends on: Opcode generator where size determines size of N in JUMP -> PUSH_n.

@@ -5,6 +5,7 @@ import Prelude hiding (LT, EQ, GT)
 
 import           Data.Text (Text)
 import qualified Data.Text as Text
+import           Data.Containers.ListUtils (nubOrd)
 
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -54,7 +55,7 @@ genPositionalJump = Gen.choice
 genLabelledOpcodes :: Gen [LabelledOpcode]
 genLabelledOpcodes = do
   opcodes <- Gen.list (Range.linear 0 40) genLabelledOpcode
-  let jumpdests = JUMPDEST <$> foldMap extractLabel opcodes
+  let jumpdests = fmap JUMPDEST . nubOrd . foldMap extractLabel $ opcodes
   Gen.shuffle (opcodes <> jumpdests)
   where
     extractLabel :: LabelledOpcode -> [Label]

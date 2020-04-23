@@ -1,5 +1,5 @@
-name:        hs-evm-opcodes
-version:     0.1.0
+name:        evm-opcodes
+version:     0.0.1
 
 synopsis:    'Opcode types for Ethereum Virtual Machine (EVM)'
 description: 'This library provides opcode types for the Ethereum Virtual Machine.'
@@ -35,7 +35,7 @@ tests:
     main: test.hs
     source-dirs: test
     dependencies:
-      - hs-evm-opcodes
+      - evm-opcodes
       - tasty
       - tasty-discover
       - tasty-hspec

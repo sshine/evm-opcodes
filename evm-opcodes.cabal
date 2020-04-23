@@ -1,0 +1,64 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 41c62572e63202d2b3d67a3fc7ae82943b841bc346d70febf3e1dff84ebdd9e3
+
+name:           evm-opcodes
+version:        0.0.1
+synopsis:       Opcode types for Ethereum Virtual Machine (EVM)
+description:    This library provides opcode types for the Ethereum Virtual Machine.
+category:       Ethereum, Finance, Network
+homepage:       https://github.com/sshine/evm-opcodes
+author:         Simon Shine
+maintainer:     shreddedglory@gmail.com
+copyright:      2020 Simon Shine
+license:        MIT
+build-type:     Simple
+extra-source-files:
+    README.md
+
+library
+  exposed-modules:
+      Data.TinyWord
+      Network.Ethereum.Evm.Opcode
+      Network.Ethereum.Evm.PositionedOpcode
+      Network.Ethereum.Evm.LabelledOpcode
+      Network.Ethereum.Evm.OpcodeTraversals
+  other-modules:
+      Paths_evm_opcodes
+  hs-source-dirs:
+      src
+  build-depends:
+      base
+    , containers
+    , largeword
+    , mtl
+    , text
+  default-language: Haskell2010
+
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: test.hs
+  other-modules:
+      OpcodeGenerators
+      OpcodeTest
+      Paths_evm_opcodes
+  hs-source-dirs:
+      test
+  build-depends:
+      base
+    , containers
+    , evm-opcodes
+    , hedgehog
+    , hspec
+    , largeword
+    , mtl
+    , tasty
+    , tasty-discover
+    , tasty-hedgehog
+    , tasty-hspec
+    , text
+  default-language: Haskell2010

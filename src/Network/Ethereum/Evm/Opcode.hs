@@ -126,7 +126,11 @@ data AbstractOpcode jumpdest =
             | CALLCODE     -- 0xf2
             | RETURN       -- 0xf3
             | DELEGATECALL -- 0xf4
-            | SUICIDE      -- 0xf5
+            | CREATE2      -- 0xf5
+            | STATICCALL   -- 0xfa
+            | REVERT       -- 0xfd
+            | INVALID      -- 0xfe
+            | SELFDESTRUCT -- 0xff
             deriving (Eq, Ord, Functor)
 
 -- | `jump`, `jumpi` and `jumpdest` are non-parameterised `Opcode`s.
@@ -270,7 +274,11 @@ opcodeSpec opcode = case opcode of
   CALLCODE      -> OpSpec 0xf2 7 1 "callcode"
   RETURN        -> OpSpec 0xf3 2 0 "return"
   DELEGATECALL  -> OpSpec 0xf4 6 1 "delegatecall"
-  SUICIDE       -> OpSpec 0xf5 1 0 "suicide"
+  CREATE2       -> OpSpec 0xf5 4 1 "create2"
+  STATICCALL    -> OpSpec 0xfa 6 1 "staticcall"
+  REVERT        -> OpSpec 0xfd 2 0 "revert"
+  INVALID       -> OpSpec 0xfe 0 0 "invalid" -- α, δ are ∅
+  SELFDESTRUCT  -> OpSpec 0xff 1 0 "selfdestruct"
 
 -- | Convert any `AbstractOpcode` into an un-parameterised `Opcode`.
 concrete :: AbstractOpcode a -> Opcode

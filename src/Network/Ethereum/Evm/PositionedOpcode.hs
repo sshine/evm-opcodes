@@ -16,7 +16,7 @@
 
 module Network.Ethereum.Evm.PositionedOpcode where
 
-import Data.LargeWord (Word256)
+import Data.DoubleWord (Word256)
 
 import Network.Ethereum.Evm.Opcode (Opcode, AbstractOpcode(..), jump, jumpi, jumpdest, concrete, opcodeSize)
 

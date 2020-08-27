@@ -34,7 +34,7 @@ library
   build-depends:
       base
     , containers
-    , largeword
+    , data-dword
     , mtl
     , text
   default-language: Haskell2010
@@ -51,10 +51,10 @@ test-suite test
   build-depends:
       base
     , containers
+    , data-dword
     , evm-opcodes
     , hedgehog
     , hspec
-    , largeword
     , mtl
     , tasty
     , tasty-discover

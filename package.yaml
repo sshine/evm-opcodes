@@ -17,7 +17,7 @@ extra-source-files:
 dependencies:
   - base
   - text
-  - largeword
+  - data-dword
   - containers
   - mtl
 

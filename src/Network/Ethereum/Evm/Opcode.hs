@@ -24,9 +24,9 @@ import Data.Monoid
 import Data.List as L
 import Data.Text as T
 
-import Data.Word
-import Data.TinyWord
-import Data.LargeWord
+import Data.Word (Word8)
+import Data.TinyWord (Word2, Word4)
+import Data.DoubleWord (Word256)
 
 import Control.Monad (void)
 import Text.Printf (printf)

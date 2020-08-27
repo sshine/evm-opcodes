@@ -17,6 +17,8 @@ extra-source-files:
 dependencies:
   - base
   - text
+  - bytestring
+  - cereal
   - data-dword
   - containers
   - mtl

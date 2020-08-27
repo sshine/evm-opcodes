@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2851b363034cb47ad357b213be5c6bbd08b0cd09e75efdf3da6625a25f2df757
+-- hash: a78bd5676a84d96c2637a001bc0942c640eeb96118d0cfff729473ee1e7c86a0
 
 name:           evm-opcodes
 version:        0.1.0
@@ -33,6 +33,8 @@ library
       src
   build-depends:
       base
+    , bytestring
+    , cereal
     , containers
     , data-dword
     , mtl
@@ -50,6 +52,8 @@ test-suite test
       test
   build-depends:
       base
+    , bytestring
+    , cereal
     , containers
     , data-dword
     , evm-opcodes

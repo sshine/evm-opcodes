@@ -73,19 +73,22 @@ data AbstractOpcode jumpdest =
             | SHA3          -- 0x20
 
             -- 30s: Environmental Information
-            | ADDRESS      -- 0x30
-            | BALANCE      -- 0x31
-            | ORIGIN       -- 0x32
-            | CALLER       -- 0x33
-            | CALLVALUE    -- 0x34
-            | CALLDATALOAD -- 0x35
-            | CALLDATASIZE -- 0x36
-            | CALLDATACOPY -- 0x37
-            | CODESIZE     -- 0x38
-            | CODECOPY     -- 0x39
-            | GASPRICE     -- 0x3a
-            | EXTCODESIZE  -- 0x3b
-            | EXTCODECOPY  -- 0x3c
+            | ADDRESS        -- 0x30
+            | BALANCE        -- 0x31
+            | ORIGIN         -- 0x32
+            | CALLER         -- 0x33
+            | CALLVALUE      -- 0x34
+            | CALLDATALOAD   -- 0x35
+            | CALLDATASIZE   -- 0x36
+            | CALLDATACOPY   -- 0x37
+            | CODESIZE       -- 0x38
+            | CODECOPY       -- 0x39
+            | GASPRICE       -- 0x3a
+            | EXTCODESIZE    -- 0x3b
+            | EXTCODECOPY    -- 0x3c
+            | RETURNDATASIZE -- 0x3d
+            | RETURNDATACOPY -- 0x3e
+            | EXTCODEHASH    -- 0x3f
 
             -- 40s: Block Information
             | BLOCKHASH  -- 0x40
@@ -185,20 +188,23 @@ opcodeSpec opcode = case opcode of
   SHA3   -> OpSpec 0x20 2 1 "sha3"
 
   -- 30s: Environmental Information
-  --     Opcode           Hex  α δ
-  ADDRESS       -> OpSpec 0x30 0 1 "address"
-  BALANCE       -> OpSpec 0x31 1 1 "balance"
-  ORIGIN        -> OpSpec 0x32 0 1 "origin"
-  CALLER        -> OpSpec 0x33 0 1 "caller"
-  CALLVALUE     -> OpSpec 0x34 0 1 "callvalue"
-  CALLDATALOAD  -> OpSpec 0x35 1 1 "calldataload"
-  CALLDATASIZE  -> OpSpec 0x36 0 1 "calldatasize"
-  CALLDATACOPY  -> OpSpec 0x37 3 0 "calldatacopy"
-  CODESIZE      -> OpSpec 0x38 0 1 "codesize"
-  CODECOPY      -> OpSpec 0x39 3 0 "codecopy"
-  GASPRICE      -> OpSpec 0x3a 0 1 "gasprice"
-  EXTCODESIZE   -> OpSpec 0x3b 1 1 "extcodesize"
-  EXTCODECOPY   -> OpSpec 0x3c 4 0 "extcodecopy"
+  --     Opcode            Hex  α δ
+  ADDRESS        -> OpSpec 0x30 0 1 "address"
+  BALANCE        -> OpSpec 0x31 1 1 "balance"
+  ORIGIN         -> OpSpec 0x32 0 1 "origin"
+  CALLER         -> OpSpec 0x33 0 1 "caller"
+  CALLVALUE      -> OpSpec 0x34 0 1 "callvalue"
+  CALLDATALOAD   -> OpSpec 0x35 1 1 "calldataload"
+  CALLDATASIZE   -> OpSpec 0x36 0 1 "calldatasize"
+  CALLDATACOPY   -> OpSpec 0x37 3 0 "calldatacopy"
+  CODESIZE       -> OpSpec 0x38 0 1 "codesize"
+  CODECOPY       -> OpSpec 0x39 3 0 "codecopy"
+  GASPRICE       -> OpSpec 0x3a 0 1 "gasprice"
+  EXTCODESIZE    -> OpSpec 0x3b 1 1 "extcodesize"
+  EXTCODECOPY    -> OpSpec 0x3c 4 0 "extcodecopy"
+  RETURNDATASIZE -> OpSpec 0x3d 0 1 "returndatasize"
+  RETURNDATACOPY -> OpSpec 0x3e 3 0 "returndatacopy"
+  EXTCODEHASH    -> OpSpec 0x3f 1 1 "extcodehash"
 
   -- 40s: Block Information
   --                    Hex  α δ

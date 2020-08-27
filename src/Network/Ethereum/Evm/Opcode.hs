@@ -65,6 +65,9 @@ data AbstractOpcode jumpdest =
             | XOR    -- 0x18
             | NOT    -- 0x19
             | BYTE   -- 0x1a
+            | SHL    -- 0x1b
+            | SHR    -- 0x1c
+            | SAR    -- 0x1d
 
             -- 20s: SHA3
             | SHA3          -- 0x20
@@ -173,6 +176,9 @@ opcodeSpec opcode = case opcode of
   XOR     -> OpSpec 0x18 2 1 "xor"
   NOT     -> OpSpec 0x19 1 1 "not"
   BYTE    -> OpSpec 0x1a 2 1 "byte"
+  SHL     -> OpSpec 0x1b 2 1 "shl"
+  SHR     -> OpSpec 0x1c 2 1 "shr"
+  SAR     -> OpSpec 0x1d 2 1 "sar"
 
   -- 20s: SHA3
   --               Hex  α δ

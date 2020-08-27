@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 41c62572e63202d2b3d67a3fc7ae82943b841bc346d70febf3e1dff84ebdd9e3
+-- hash: 2851b363034cb47ad357b213be5c6bbd08b0cd09e75efdf3da6625a25f2df757
 
 name:           evm-opcodes
-version:        0.0.1
+version:        0.1.0
 synopsis:       Opcode types for Ethereum Virtual Machine (EVM)
 description:    This library provides opcode types for the Ethereum Virtual Machine.
 category:       Ethereum, Finance, Network

@@ -65,9 +65,9 @@ data AbstractOpcode jumpdest =
             | XOR    -- 0x18
             | NOT    -- 0x19
             | BYTE   -- 0x1a
-            | SHL    -- 0x1b
-            | SHR    -- 0x1c
-            | SAR    -- 0x1d
+            | SHL    -- 0x1b, https://eips.ethereum.org/EIPS/eip-145
+            | SHR    -- 0x1c, https://eips.ethereum.org/EIPS/eip-145
+            | SAR    -- 0x1d, https://eips.ethereum.org/EIPS/eip-145
 
             -- 20s: SHA3
             | SHA3          -- 0x20
@@ -86,17 +86,19 @@ data AbstractOpcode jumpdest =
             | GASPRICE       -- 0x3a
             | EXTCODESIZE    -- 0x3b
             | EXTCODECOPY    -- 0x3c
-            | RETURNDATASIZE -- 0x3d
-            | RETURNDATACOPY -- 0x3e
-            | EXTCODEHASH    -- 0x3f
+            | RETURNDATASIZE -- 0x3d, https://eips.ethereum.org/EIPS/eip-211
+            | RETURNDATACOPY -- 0x3e, https://eips.ethereum.org/EIPS/eip-211
+            | EXTCODEHASH    -- 0x3f, https://eips.ethereum.org/EIPS/eip-1052
 
             -- 40s: Block Information
-            | BLOCKHASH  -- 0x40
-            | COINBASE   -- 0x41
-            | TIMESTAMP  -- 0x42
-            | NUMBER     -- 0x43
-            | DIFFICULTY -- 0x44
-            | GASLIMIT   -- 0x45
+            | BLOCKHASH   -- 0x40
+            | COINBASE    -- 0x41
+            | TIMESTAMP   -- 0x42
+            | NUMBER      -- 0x43
+            | DIFFICULTY  -- 0x44
+            | GASLIMIT    -- 0x45
+            | CHAINID     -- 0x46, https://eips.ethereum.org/EIPS/eip-1344
+            | SELFBALANCE -- 0x47, https://eips.ethereum.org/EIPS/eip-1884
 
             -- 50s: Stack, Memory, Storage and Flow Operations
             | POP               -- 0x50
@@ -125,12 +127,12 @@ data AbstractOpcode jumpdest =
             | CALL         -- 0xf1
             | CALLCODE     -- 0xf2
             | RETURN       -- 0xf3
-            | DELEGATECALL -- 0xf4
-            | CREATE2      -- 0xf5
+            | DELEGATECALL -- 0xf4, https://eips.ethereum.org/EIPS/eip-7
+            | CREATE2      -- 0xf5, https://eips.ethereum.org/EIPS/eip-1014
             | STATICCALL   -- 0xfa
-            | REVERT       -- 0xfd
-            | INVALID      -- 0xfe
-            | SELFDESTRUCT -- 0xff
+            | REVERT       -- 0xfd, https://eips.ethereum.org/EIPS/eip-140
+            | INVALID      -- 0xfe, https://eips.ethereum.org/EIPS/eip-141
+            | SELFDESTRUCT -- 0xff, https://eips.ethereum.org/EIPS/eip-6
             deriving (Eq, Ord, Functor)
 
 -- | `jump`, `jumpi` and `jumpdest` are non-parameterised `Opcode`s.
@@ -218,9 +220,11 @@ opcodeSpec opcode = case opcode of
   NUMBER      -> OpSpec 0x43 0 1 "number"
   DIFFICULTY  -> OpSpec 0x44 0 1 "difficulty"
   GASLIMIT    -> OpSpec 0x45 0 1 "gaslimit"
+  CHAINID     -> OpSpec 0x46 0 1 "chainid"
+  SELFBALANCE -> OpSpec 0x47 0 1 "selfbalance"
 
   -- 50s: Stack, Memory, Storage and Flow Operations
-  --                   Hex  α δ
+  --                    Hex  α δ
   POP         -> OpSpec 0x50 1 0 "pop"
   MLOAD       -> OpSpec 0x51 1 1 "mload"
   MSTORE      -> OpSpec 0x52 2 0 "mstore"

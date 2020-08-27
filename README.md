@@ -1,4 +1,4 @@
-# hs-evm-opcodes
+# evm-opcodes
 
 This Haskell library provides opcode types for the Ethereum Virtual Machine (EVM).
 

@@ -113,12 +113,12 @@ data AbstractOpcode jumpdest =
             | JUMPDEST jumpdest -- 0x5b
 
             -- 60s & 70s: Push Operations
-            | PUSH Word256 -- 0x60 - 0x7f (PUSH1-PUSH32)
-            | DUP Word4    -- 0x80 - 0x8f (DUP1-DUP16)
-            | SWAP Word4   -- 0x90 - 0x9f (SWAP1-SWAP16)
+            | PUSH !Word256 -- 0x60 - 0x7f (PUSH1-PUSH32)
+            | DUP !Word4    -- 0x80 - 0x8f (DUP1-DUP16)
+            | SWAP !Word4   -- 0x90 - 0x9f (SWAP1-SWAP16)
 
             -- a0s: Logging Operations
-            | LOG Word2     -- 0x0a - 0xa4 (LOG0-LOG4)
+            | LOG !Word2    -- 0x0a - 0xa4 (LOG0-LOG4)
 
             -- f0s: System Operations
             | CREATE       -- 0xf0

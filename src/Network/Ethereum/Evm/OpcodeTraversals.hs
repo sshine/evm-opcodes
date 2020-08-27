@@ -58,24 +58,30 @@ mapOpcodeM mapper opcode = case opcode of
   XOR     -> mapOnOther' XOR XOR
   NOT     -> mapOnOther' NOT NOT
   BYTE    -> mapOnOther' BYTE BYTE
+  SHL     -> mapOnOther' SHL SHL
+  SHR     -> mapOnOther' SHR SHR
+  SAR     -> mapOnOther' SAR SAR
 
   -- 20s: SHA3
   SHA3 -> mapOnOther' SHA3 SHA3
 
   -- 30s: Environmental Information
-  ADDRESS       -> mapOnOther' ADDRESS ADDRESS
-  BALANCE       -> mapOnOther' BALANCE BALANCE
-  ORIGIN        -> mapOnOther' ORIGIN ORIGIN
-  CALLER        -> mapOnOther' CALLER CALLER
-  CALLVALUE     -> mapOnOther' CALLVALUE CALLVALUE
-  CALLDATALOAD  -> mapOnOther' CALLDATALOAD CALLDATALOAD
-  CALLDATASIZE  -> mapOnOther' CALLDATASIZE CALLDATASIZE
-  CALLDATACOPY  -> mapOnOther' CALLDATACOPY CALLDATACOPY
-  CODESIZE      -> mapOnOther' CODESIZE CODESIZE
-  CODECOPY      -> mapOnOther' CODECOPY CODECOPY
-  GASPRICE      -> mapOnOther' GASPRICE GASPRICE
-  EXTCODESIZE   -> mapOnOther' EXTCODESIZE EXTCODESIZE
-  EXTCODECOPY   -> mapOnOther' EXTCODECOPY EXTCODECOPY
+  ADDRESS        -> mapOnOther' ADDRESS ADDRESS
+  BALANCE        -> mapOnOther' BALANCE BALANCE
+  ORIGIN         -> mapOnOther' ORIGIN ORIGIN
+  CALLER         -> mapOnOther' CALLER CALLER
+  CALLVALUE      -> mapOnOther' CALLVALUE CALLVALUE
+  CALLDATALOAD   -> mapOnOther' CALLDATALOAD CALLDATALOAD
+  CALLDATASIZE   -> mapOnOther' CALLDATASIZE CALLDATASIZE
+  CALLDATACOPY   -> mapOnOther' CALLDATACOPY CALLDATACOPY
+  CODESIZE       -> mapOnOther' CODESIZE CODESIZE
+  CODECOPY       -> mapOnOther' CODECOPY CODECOPY
+  GASPRICE       -> mapOnOther' GASPRICE GASPRICE
+  EXTCODESIZE    -> mapOnOther' EXTCODESIZE EXTCODESIZE
+  EXTCODECOPY    -> mapOnOther' EXTCODECOPY EXTCODECOPY
+  RETURNDATASIZE -> mapOnOther' RETURNDATASIZE RETURNDATASIZE
+  RETURNDATACOPY -> mapOnOther' RETURNDATACOPY RETURNDATACOPY
+  EXTCODEHASH    -> mapOnOther' EXTCODEHASH EXTCODEHASH
 
   -- 40s: Block Information
   BLOCKHASH   -> mapOnOther' BLOCKHASH BLOCKHASH
@@ -114,7 +120,10 @@ mapOpcodeM mapper opcode = case opcode of
   CALLCODE     -> mapOnOther' CALLCODE CALLCODE
   RETURN       -> mapOnOther' RETURN RETURN
   DELEGATECALL -> mapOnOther' DELEGATECALL DELEGATECALL
-  SUICIDE      -> mapOnOther' SUICIDE SUICIDE
+  CREATE2      -> mapOnOther' CREATE2 CREATE2
+  STATICCALL   -> mapOnOther' STATICCALL STATICCALL
+  REVERT       -> mapOnOther' REVERT REVERT
+  SELFDESTRUCT -> mapOnOther' SELFDESTRUCT SELFDESTRUCT
   where
     mapOnOther' :: Monad m => AbstractOpcode a -> AbstractOpcode b -> m (AbstractOpcode b)
     mapOnOther' opa opbDefault = do

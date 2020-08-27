@@ -20,16 +20,17 @@ module Network.Ethereum.Evm.Opcode where
 
 import Prelude hiding (LT, EQ, GT)
 
-import Data.Monoid
-import Data.List as L
-import Data.Text as T
-
-import Data.Word (Word8)
-import Data.TinyWord (Word2, Word4)
-import Data.DoubleWord (Word256)
-
-import Control.Monad (void)
-import Text.Printf (printf)
+import           Control.Monad (void)
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import           Data.DoubleWord (Word256, fromHiAndLo)
+import qualified Data.Serialize.Get as Cereal
+import           Data.Text (Text)
+import qualified Data.Text as Text
+import qualified Data.List as List
+import           Data.TinyWord (Word2, Word4)
+import           Data.Word (Word8)
+import           Text.Printf (printf)
 
 -- | An Ethereum VM Opcode.
 type Opcode = AbstractOpcode ()
@@ -40,100 +41,100 @@ type Opcode = AbstractOpcode ()
 -- jumps.
 data AbstractOpcode jumpdest =
             -- 0s: Stop and Arithmetic Operations
-              STOP       -- 0x00
-            | ADD        -- 0x01
-            | MUL        -- 0x02
-            | SUB        -- 0x03
-            | DIV        -- 0x04
-            | SDIV       -- 0x05
-            | MOD        -- 0x06
-            | SMOD       -- 0x07
-            | ADDMOD     -- 0x08
-            | MULMOD     -- 0x09
-            | EXP        -- 0x0a
-            | SIGNEXTEND -- 0x0b
+              STOP       -- ^ 0x00
+            | ADD        -- ^ 0x01
+            | MUL        -- ^ 0x02
+            | SUB        -- ^ 0x03
+            | DIV        -- ^ 0x04
+            | SDIV       -- ^ 0x05
+            | MOD        -- ^ 0x06
+            | SMOD       -- ^ 0x07
+            | ADDMOD     -- ^ 0x08
+            | MULMOD     -- ^ 0x09
+            | EXP        -- ^ 0x0a
+            | SIGNEXTEND -- ^ 0x0b
 
             -- 10s: Comparison & Bitwise Logic Operations
-            | LT     -- 0x10
-            | GT     -- 0x11
-            | SLT    -- 0x12
-            | SGT    -- 0x13
-            | EQ     -- 0x14
-            | ISZERO -- 0x15
-            | AND    -- 0x16
-            | OR     -- 0x17
-            | XOR    -- 0x18
-            | NOT    -- 0x19
-            | BYTE   -- 0x1a
-            | SHL    -- 0x1b, https://eips.ethereum.org/EIPS/eip-145
-            | SHR    -- 0x1c, https://eips.ethereum.org/EIPS/eip-145
-            | SAR    -- 0x1d, https://eips.ethereum.org/EIPS/eip-145
+            | LT     -- ^ 0x10
+            | GT     -- ^ 0x11
+            | SLT    -- ^ 0x12
+            | SGT    -- ^ 0x13
+            | EQ     -- ^ 0x14
+            | ISZERO -- ^ 0x15
+            | AND    -- ^ 0x16
+            | OR     -- ^ 0x17
+            | XOR    -- ^ 0x18
+            | NOT    -- ^ 0x19
+            | BYTE   -- ^ 0x1a
+            | SHL    -- ^ 0x1b, https://eips.ethereum.org/EIPS/eip-145
+            | SHR    -- ^ 0x1c, https://eips.ethereum.org/EIPS/eip-145
+            | SAR    -- ^ 0x1d, https://eips.ethereum.org/EIPS/eip-145
 
             -- 20s: SHA3
-            | SHA3          -- 0x20
+            | SHA3          -- ^ 0x20
 
             -- 30s: Environmental Information
-            | ADDRESS        -- 0x30
-            | BALANCE        -- 0x31
-            | ORIGIN         -- 0x32
-            | CALLER         -- 0x33
-            | CALLVALUE      -- 0x34
-            | CALLDATALOAD   -- 0x35
-            | CALLDATASIZE   -- 0x36
-            | CALLDATACOPY   -- 0x37
-            | CODESIZE       -- 0x38
-            | CODECOPY       -- 0x39
-            | GASPRICE       -- 0x3a
-            | EXTCODESIZE    -- 0x3b
-            | EXTCODECOPY    -- 0x3c
-            | RETURNDATASIZE -- 0x3d, https://eips.ethereum.org/EIPS/eip-211
-            | RETURNDATACOPY -- 0x3e, https://eips.ethereum.org/EIPS/eip-211
-            | EXTCODEHASH    -- 0x3f, https://eips.ethereum.org/EIPS/eip-1052
+            | ADDRESS        -- ^ 0x30
+            | BALANCE        -- ^ 0x31
+            | ORIGIN         -- ^ 0x32
+            | CALLER         -- ^ 0x33
+            | CALLVALUE      -- ^ 0x34
+            | CALLDATALOAD   -- ^ 0x35
+            | CALLDATASIZE   -- ^ 0x36
+            | CALLDATACOPY   -- ^ 0x37
+            | CODESIZE       -- ^ 0x38
+            | CODECOPY       -- ^ 0x39
+            | GASPRICE       -- ^ 0x3a
+            | EXTCODESIZE    -- ^ 0x3b
+            | EXTCODECOPY    -- ^ 0x3c
+            | RETURNDATASIZE -- ^ 0x3d, https://eips.ethereum.org/EIPS/eip-211
+            | RETURNDATACOPY -- ^ 0x3e, https://eips.ethereum.org/EIPS/eip-211
+            | EXTCODEHASH    -- ^ 0x3f, https://eips.ethereum.org/EIPS/eip-1052
 
             -- 40s: Block Information
-            | BLOCKHASH   -- 0x40
-            | COINBASE    -- 0x41
-            | TIMESTAMP   -- 0x42
-            | NUMBER      -- 0x43
-            | DIFFICULTY  -- 0x44
-            | GASLIMIT    -- 0x45
-            | CHAINID     -- 0x46, https://eips.ethereum.org/EIPS/eip-1344
-            | SELFBALANCE -- 0x47, https://eips.ethereum.org/EIPS/eip-1884
+            | BLOCKHASH   -- ^ 0x40
+            | COINBASE    -- ^ 0x41
+            | TIMESTAMP   -- ^ 0x42
+            | NUMBER      -- ^ 0x43
+            | DIFFICULTY  -- ^ 0x44
+            | GASLIMIT    -- ^ 0x45
+            | CHAINID     -- ^ 0x46, https://eips.ethereum.org/EIPS/eip-1344
+            | SELFBALANCE -- ^ 0x47, https://eips.ethereum.org/EIPS/eip-1884
 
             -- 50s: Stack, Memory, Storage and Flow Operations
-            | POP               -- 0x50
-            | MLOAD             -- 0x51
-            | MSTORE            -- 0x52
-            | MSTORE8           -- 0x53
-            | SLOAD             -- 0x54
-            | SSTORE            -- 0x55
-            | JUMP jumpdest     -- 0x56
-            | JUMPI jumpdest    -- 0x57
-            | PC                -- 0x58
-            | MSIZE             -- 0x59
-            | GAS               -- 0x5a
-            | JUMPDEST jumpdest -- 0x5b
+            | POP               -- ^ 0x50
+            | MLOAD             -- ^ 0x51
+            | MSTORE            -- ^ 0x52
+            | MSTORE8           -- ^ 0x53
+            | SLOAD             -- ^ 0x54
+            | SSTORE            -- ^ 0x55
+            | JUMP jumpdest     -- ^ 0x56
+            | JUMPI jumpdest    -- ^ 0x57
+            | PC                -- ^ 0x58
+            | MSIZE             -- ^ 0x59
+            | GAS               -- ^ 0x5a
+            | JUMPDEST jumpdest -- ^ 0x5b
 
             -- 60s & 70s: Push Operations
-            | PUSH !Word256 -- 0x60 - 0x7f (PUSH1-PUSH32)
-            | DUP !Word4    -- 0x80 - 0x8f (DUP1-DUP16)
-            | SWAP !Word4   -- 0x90 - 0x9f (SWAP1-SWAP16)
+            | PUSH !Word256 -- ^ 0x60 - 0x7f (PUSH1-PUSH32)
+            | DUP !Word4    -- ^ 0x80 - 0x8f (DUP1-DUP16)
+            | SWAP !Word4   -- ^ 0x90 - 0x9f (SWAP1-SWAP16)
 
             -- a0s: Logging Operations
-            | LOG !Word2    -- 0x0a - 0xa4 (LOG0-LOG4)
+            | LOG !Word2    -- ^ 0x0a - 0xa4 (LOG0-LOG4)
 
             -- f0s: System Operations
-            | CREATE       -- 0xf0
-            | CALL         -- 0xf1
-            | CALLCODE     -- 0xf2
-            | RETURN       -- 0xf3
-            | DELEGATECALL -- 0xf4, https://eips.ethereum.org/EIPS/eip-7
-            | CREATE2      -- 0xf5, https://eips.ethereum.org/EIPS/eip-1014
-            | STATICCALL   -- 0xfa
-            | REVERT       -- 0xfd, https://eips.ethereum.org/EIPS/eip-140
-            | INVALID      -- 0xfe, https://eips.ethereum.org/EIPS/eip-141
-            | SELFDESTRUCT -- 0xff, https://eips.ethereum.org/EIPS/eip-6
-            deriving (Eq, Ord, Functor)
+            | CREATE       -- ^ 0xf0
+            | CALL         -- ^ 0xf1
+            | CALLCODE     -- ^ 0xf2
+            | RETURN       -- ^ 0xf3
+            | DELEGATECALL -- ^ 0xf4, https://eips.ethereum.org/EIPS/eip-7
+            | CREATE2      -- ^ 0xf5, https://eips.ethereum.org/EIPS/eip-1014
+            | STATICCALL   -- ^ 0xfa
+            | REVERT       -- ^ 0xfd, https://eips.ethereum.org/EIPS/eip-140
+            | INVALID      -- ^ 0xfe, https://eips.ethereum.org/EIPS/eip-141
+            | SELFDESTRUCT -- ^ 0xff, https://eips.ethereum.org/EIPS/eip-6
+  deriving (Eq, Ord, Functor)
 
 -- | `jump`, `jumpi` and `jumpdest` are non-parameterised `Opcode`s.
 jump, jumpi, jumpdest :: Opcode
@@ -142,14 +143,18 @@ jumpi = JUMPI ()
 jumpdest = JUMPDEST ()
 
 -- | An `OpcodeSpecification` for a given `Opcode` contains the numeric
--- encoding of the opcode, the number of items that this opcode places on
--- the stack (α in EIP-150 appendix H.2), and the number of items removed
--- from the stack (δ in EIP-150).
+-- encoding of the opcode, the number of items that this opcode removes
+-- from the stack (α), and the number of items added to the stack (δ).
+--
+-- Examples of `OpSpec`s:
+--
+-- > OpSpec 0x01 2 1 "add"
+-- > OpSpec 0x60 0 1 "push1 255"
 data OpcodeSpecification =
-  OpSpec { _opcodeEncoding :: Word8 -- The numeric encoding
-         , _opcodeAlpha    :: Word8 -- Items placed on the stack
-         , _opcodeDelta    :: Word8 -- Items removed from the stack
-         , _opcodeName     :: Text  -- A printable name
+  OpSpec { _opcodeEncoding :: Word8 -- ^ The numeric encoding
+         , _opcodeAlpha    :: Word8 -- ^ Items placed on the stack
+         , _opcodeDelta    :: Word8 -- ^ Items removed from the stack
+         , _opcodeName     :: Text  -- ^ A printable name
          }
 
 -- | Given an `Opcode`, produce its `OpcodeSpecification`. For `DUP`, `SWAP`
@@ -243,32 +248,32 @@ opcodeSpec opcode = case opcode of
                OpSpec { _opcodeEncoding = pushEncoding
                       , _opcodeAlpha    = 0
                       , _opcodeDelta    = 1
-                      , _opcodeName     = T.concat
+                      , _opcodeName     = Text.concat
                           [ "push"
-                          , T.pack (show (L.length pushBytes))
+                          , Text.pack (show (List.length pushBytes))
                           , " "
-                          , T.pack (show n) ]
+                          , Text.pack (show n) ]
                       }
 
   -- 80s: Duplication Operations (DUP)
   DUP i     -> OpSpec { _opcodeEncoding = 0x80 + fromIntegral i
                       , _opcodeAlpha    = fromIntegral i + 1
                       , _opcodeDelta    = fromIntegral i + 2
-                      , _opcodeName     = "dup" <> T.pack (show (i+1))
+                      , _opcodeName     = "dup" <> Text.pack (show (i+1))
                       }
 
   -- 90s: Exchange operations (SWAP)
   SWAP i    -> OpSpec { _opcodeEncoding = 0x90 + fromIntegral i
                       , _opcodeAlpha    = fromIntegral i + 1
                       , _opcodeDelta    = fromIntegral i + 1
-                      , _opcodeName     = "swap" <> T.pack (show (i+1))
+                      , _opcodeName     = "swap" <> Text.pack (show (i+1))
                       }
 
   -- a0s: Logging Operations (LOG)
   LOG i     -> OpSpec { _opcodeEncoding = 0xa0 + fromIntegral i
                       , _opcodeAlpha    = fromIntegral i + 2
                       , _opcodeDelta    = 0
-                      , _opcodeName     = "log" <> T.pack (show (i+1))
+                      , _opcodeName     = "log" <> Text.pack (show (i+1))
                       }
 
   -- f0s: System Operations
@@ -294,7 +299,7 @@ opcodeText = _opcodeName . opcodeSpec
 
 -- | Show `Opcode` as `String`.
 instance Show a => Show (AbstractOpcode a) where
-  show opcode = T.unpack (opcodeText (concrete opcode)) <> show' opcode
+  show opcode = Text.unpack (opcodeText (concrete opcode)) <> show' opcode
     where
       show' (JUMP a) = " " <> show a
       show' (JUMPI a) = " " <> show a
@@ -307,13 +312,13 @@ instance Show a => Show (AbstractOpcode a) where
 -- the label of a `LabelledOpcode` points to before code generation has
 -- completed.
 opcodeSize :: Num i => Opcode -> i
-opcodeSize (PUSH n) = L.genericLength . uncurry (:) $ push' n
+opcodeSize (PUSH n) = List.genericLength . uncurry (:) $ push' n
 opcodeSize _opcode = 1
 
 -- | Pretty-print an `Opcode` as a hexadecimal code.
 ppHex :: Opcode -> Text
-ppHex (PUSH n) = T.pack $ L.concatMap (printf "%02x") . uncurry (:) $ push' n
-ppHex opcode = T.pack $ printf "%02x" . _opcodeEncoding . opcodeSpec $ opcode
+ppHex (PUSH n) = Text.pack $ List.concatMap (printf "%02x") . uncurry (:) $ push' n
+ppHex opcode = Text.pack $ printf "%02x" . _opcodeEncoding . opcodeSpec $ opcode
 
 -- | Convert the constant argument of a `PUSH` to the opcode encoding
 -- (0x60--0x7f) and its constant split into `Word8` segments.

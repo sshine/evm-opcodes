@@ -433,10 +433,14 @@ opcodeSize :: Num i => Opcode -> i
 opcodeSize (PUSH n) = List.genericLength . uncurry (:) $ push' n
 opcodeSize _opcode = 1
 
--- | Pretty-print an `Opcode` as a hexadecimal code.
+-- | Pretty-print an `Opcode` as a hexadecimal code (`Text`).
 ppHex :: Opcode -> Text
-ppHex (PUSH n) = Text.pack $ List.concatMap (printf "%02x") . uncurry (:) $ push' n
-ppHex opcode = Text.pack $ printf "%02x" . _opcodeEncoding . opcodeSpec $ opcode
+ppHex = Text.pack . showHex
+
+-- | Pretty-print an `Opcode` as a hexadecimal code (`String`).
+showHex :: Opcode -> String
+showHex (PUSH n) = List.concatMap (printf "%02x") . uncurry (:) $ push' n
+showHex opcode = printf "%02x" . _opcodeEncoding . opcodeSpec $ opcode
 
 -- | Convert the constant argument of a `PUSH` to the opcode encoding
 -- (0x60--0x7f) and its constant split into `Word8` segments.

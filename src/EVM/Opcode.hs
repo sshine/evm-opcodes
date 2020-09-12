@@ -10,7 +10,11 @@
 --
 -- This module exposes the 'Opcode' type for expressing Ethereum VM opcodes
 -- as extracted from the Ethereum Yellow Paper with amendments from various
--- EIPs. The Yellow Paper is available at http://yellowpaper.io/ appendix H.2.
+-- EIPs. The Yellow Paper is available at:
+--
+-- https://ethereum.github.io/yellowpaper/paper.pdf
+--
+-- The list of opcodes is found in appendix H.2.
 --
 -- For an overview of EIPs that add or modify instructions, see comments in
 -- the source code.
@@ -136,15 +140,22 @@ data Opcode' jumpdest
   | SELFDESTRUCT      -- ^ 0xff, https://eips.ethereum.org/EIPS/eip-6
   deriving (Eq, Ord, Functor)
 
--- | 'jump', 'jumpi' and 'jumpdest' are plain 'Opcode's without parameters.
-jump, jumpi, jumpdest :: Opcode
+-- | 'jump' is a plain parameterless 'Opcode'.
+jump :: Opcode
 jump = JUMP ()
+
+-- | 'jumpi' is a plain parameterless 'Opcode'.
+jumpi :: Opcode
 jumpi = JUMPI ()
+
+-- | 'jumpdest' is a plain parameterless 'Opcode'.
+jumpdest :: Opcode
 jumpdest = JUMPDEST ()
 
 -- | An 'OpcodeSpecification' for a given 'Opcode' contains the numeric
 -- encoding of the opcode, the number of items that this opcode removes
 -- from the stack (α), and the number of items added to the stack (δ).
+-- These values are documented in the Ethereum Yellow Paper.
 --
 -- Examples of 'OpSpec's:
 --
@@ -158,9 +169,10 @@ data OpcodeSpecification = OpSpec
   , opcodeName     :: Text  -- ^ A printable name for the opcode
   }
 
--- | Given an 'Opcode', produce its 'OpcodeSpecification'. For 'DUP', 'SWAP'
--- and 'LOG' this depends on the specific variant, and for 'PUSH' it depends
--- on the size of the constant being pushed.
+-- | Given an 'Opcode'', produce its 'OpcodeSpecification'.
+
+-- For 'DUP', 'SWAP' and 'LOG' this depends on the specific variant, and for
+-- 'PUSH' it depends on the size of the constant being pushed.
 opcodeSpec :: Opcode' a -> OpcodeSpecification
 opcodeSpec opcode = case opcode of
   -- 0s: Stop and Arithmetic Operations
@@ -291,10 +303,20 @@ opcodeSpec opcode = case opcode of
   INVALID      -> OpSpec 0xfe 0 0 "invalid" -- α, δ are ∅
   SELFDESTRUCT -> OpSpec 0xff 1 0 "selfdestruct"
 
-isDUP, isSWAP, isLOG, isPUSH :: Word8 -> Bool
+-- | 'isDUP' determines if an encoded opcode belongs to the class of 'DUP' (DUP1-DUP16).
+isDUP :: Word8 -> Bool
 isDUP b  = b >= 0x80 && b <= 0x8f
+
+-- | 'isSWAP' determines if an encoded opcode belongs to the class of 'SWAP' (SWAP1-SWAP16).
+isSWAP :: Word8 -> Bool
 isSWAP b = b >= 0x90 && b <= 0x9f
+
+-- | 'isSWAP' determines if an encoded opcode belongs to the class of 'LOG' (SWAP1-SWAP4).
+isLOG :: Word8 -> Bool
 isLOG b  = b >= 0xa0 && b <= 0xa4
+
+-- | 'isPUSH' determines if an encoded opcode belongs to the class of 'PUSH' (PUSH1-PUSH32).
+isPUSH :: Word8 -> Bool
 isPUSH b = b >= 0x60 && b <= 0x7f
 
 -- | Parse an 'Opcode' from a 'Word8'. In case of 'PUSH' instructions, read the
@@ -425,11 +447,9 @@ concrete = void
 opcodeText :: Opcode' a -> Text
 opcodeText = opcodeName . opcodeSpec
 
--- | Show 'Opcode'.
 instance {-# OVERLAPPING #-} Show Opcode where
   show = Text.unpack . opcodeText
 
--- | Show 'Opcode''.
 instance {-# OVERLAPPABLE #-} Show a => Show (Opcode' a) where
   show opcode = show (concrete opcode) <> showParam opcode
     where

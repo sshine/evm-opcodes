@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a78bd5676a84d96c2637a001bc0942c640eeb96118d0cfff729473ee1e7c86a0
+-- hash: 2fdc5bb5d9f8e55cb6652569da3dd4717210b674a0d6344a51972426d989d012
 
 name:           evm-opcodes
 version:        0.1.0
@@ -23,10 +23,10 @@ extra-source-files:
 library
   exposed-modules:
       Data.TinyWord
-      Network.Ethereum.Evm.Opcode
-      Network.Ethereum.Evm.PositionedOpcode
-      Network.Ethereum.Evm.LabelledOpcode
-      Network.Ethereum.Evm.OpcodeTraversals
+      EVM.Opcode
+      EVM.Opcode.Positional
+      EVM.Opcode.Labelled
+      EVM.Opcode.Traversal
   other-modules:
       Paths_evm_opcodes
   hs-source-dirs:

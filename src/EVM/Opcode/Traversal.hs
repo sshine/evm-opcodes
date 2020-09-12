@@ -1,32 +1,33 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 -- |
--- Module: Network.Ethereum.Evm.OpcodeTraversals
+-- Module: EVM.Opcode.Traversal
 -- Copyright: 2018 Simon Shine
 -- Maintainer: Simon Shine <shreddedglory@gmail.com>
 -- License: MIT
 --
--- This module exposes generic methods of traversing `AbstractOpcode`s.
+-- This module exposes generic methods of traversing 'Opcode''s.
 
-module Network.Ethereum.Evm.OpcodeTraversals where
+module EVM.Opcode.Traversal where
 
 import Prelude hiding (LT, EQ, GT)
-import Network.Ethereum.Evm.Opcode
 import Control.Monad.Identity
 
+import EVM.Opcode
+
 data OpcodeMapperM m a b = OpcodeMapperM
-  { mapOnJump     :: a -> m (AbstractOpcode b)
-  , mapOnJumpi    :: a -> m (AbstractOpcode b)
-  , mapOnJumpDest :: a -> m (AbstractOpcode b)
-  , mapOnOther    :: AbstractOpcode a -> m (Maybe (AbstractOpcode b))
+  { mapOnJump     :: a -> m (Opcode' b)
+  , mapOnJumpi    :: a -> m (Opcode' b)
+  , mapOnJumpDest :: a -> m (Opcode' b)
+  , mapOnOther    :: Opcode' a -> m (Maybe (Opcode' b))
   }
 
 type OpcodeMapper = OpcodeMapperM Identity
 
-mapOpcode :: OpcodeMapper a b -> AbstractOpcode a -> AbstractOpcode b
+mapOpcode :: OpcodeMapper a b -> Opcode' a -> Opcode' b
 mapOpcode mapper = runIdentity . mapOpcodeM mapper
 
-mapOpcodeM :: forall m a b. Monad m => OpcodeMapperM m a b -> AbstractOpcode a -> m (AbstractOpcode b)
+mapOpcodeM :: forall m a b. Monad m => OpcodeMapperM m a b -> Opcode' a -> m (Opcode' b)
 mapOpcodeM mapper opcode = case opcode of
   JUMP a     -> mapOnJump mapper a
   JUMPI a    -> mapOnJumpi mapper a
@@ -90,6 +91,8 @@ mapOpcodeM mapper opcode = case opcode of
   NUMBER      -> mapOnOther' NUMBER NUMBER
   DIFFICULTY  -> mapOnOther' DIFFICULTY DIFFICULTY
   GASLIMIT    -> mapOnOther' GASLIMIT GASLIMIT
+  CHAINID     -> mapOnOther' CHAINID CHAINID
+  SELFBALANCE -> mapOnOther' SELFBALANCE SELFBALANCE
 
   -- 50s: Stack, Memory, Storage and Flow Operations
   POP       -> mapOnOther' POP POP
@@ -123,9 +126,10 @@ mapOpcodeM mapper opcode = case opcode of
   CREATE2      -> mapOnOther' CREATE2 CREATE2
   STATICCALL   -> mapOnOther' STATICCALL STATICCALL
   REVERT       -> mapOnOther' REVERT REVERT
+  INVALID      -> mapOnOther' INVALID INVALID
   SELFDESTRUCT -> mapOnOther' SELFDESTRUCT SELFDESTRUCT
   where
-    mapOnOther' :: Monad m => AbstractOpcode a -> AbstractOpcode b -> m (AbstractOpcode b)
+    mapOnOther' :: Monad m => Opcode' a -> Opcode' b -> m (Opcode' b)
     mapOnOther' opa opbDefault = do
       res <- mapOnOther mapper opa
       case res of

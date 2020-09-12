@@ -26,10 +26,10 @@ dependencies:
 library:
   exposed-modules:
     - Data.TinyWord
-    - Network.Ethereum.Evm.Opcode
-    - Network.Ethereum.Evm.PositionedOpcode
-    - Network.Ethereum.Evm.LabelledOpcode
-    - Network.Ethereum.Evm.OpcodeTraversals
+    - EVM.Opcode
+    - EVM.Opcode.Positional
+    - EVM.Opcode.Labelled
+    - EVM.Opcode.Traversal
   source-dirs: src
 
 tests:

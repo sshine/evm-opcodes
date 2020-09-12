@@ -2,24 +2,24 @@
 {-# LANGUAGE LambdaCase #-}
 
 -- |
--- Module: Network.Ethereum.Evm.LabelledOpcode
+-- Module: EVM.Opcode.Labelled
 -- Copyright: 2018 Simon Shine
 -- Maintainer: Simon Shine <shreddedglory@gmail.com>
 -- License: MIT
 --
--- This module exposes the `LabelledOpcode` type for expressing Ethereum VM
+-- This module exposes the 'LabelledOpcode' type for expressing Ethereum VM
 -- opcodes with labelled jumps. Plain Ethereum VM Opcodes are difficult to
 -- compose because jumping to a fixed location in program memory creates a
--- non-trivial constraint in the code-generator:
+-- non-trivial constraint in the code-generator.
 --
--- With `Opcode` the address is pushed to the stack via `PUSH`, but the
--- offset to the `JUMPDEST` depends on all occurrences of `PUSH` prior to
--- the label, including the `PUSH` to the label itself.
+-- With 'Opcode' the address is pushed to the stack via 'PUSH', but the
+-- offset to the 'JUMPDEST' depends on all occurrences of 'PUSH' prior to
+-- the label, including the 'PUSH' to the label itself.
 --
--- With `LabelledOpcode` one can express named labels and not worry about
+-- With 'LabelledOpcode' one can express named labels and not worry about
 -- calculating the positions of labels until a late stage.
 
-module Network.Ethereum.Evm.LabelledOpcode
+module EVM.Opcode.Labelled
   ( Label
   , LabelledOpcode
   , TranslateError(..)
@@ -35,26 +35,36 @@ import           Data.Map (Map)
 import Data.Maybe (mapMaybe)
 import Control.Monad (forM)
 
-import Network.Ethereum.Evm.Opcode (AbstractOpcode(..), opcodeSize, jumpdest, concrete)
-import Network.Ethereum.Evm.PositionedOpcode (Position, PositionedOpcode, jumpSize)
-import Network.Ethereum.Evm.OpcodeTraversals
+import EVM.Opcode (Opcode'(..), opcodeSize, jumpdest, concrete)
+import EVM.Opcode.Positional (Position, PositionalOpcode, jumpSize)
+import EVM.Opcode.Traversal
 
--- | For now, all labels are `Text`.
+-- | For now, all labels are 'Text'.
 type Label = Text
 
--- | LabelledOpcodes: `JUMP "name"`, `JUMPI "name"` and `JUMPDEST "name"`.
--- All other Opcodes remain the same.
-type LabelledOpcode = AbstractOpcode Label
+-- | LabelledOpcodes: 'JUMP "name"', 'JUMPI "name"' and 'JUMPDEST "name"'.
+-- All other opcodes remain the same.
+type LabelledOpcode = Opcode' Label
 
--- | Translation of `LabelledOpcode` into `PositionedOpcode` may fail if
--- either a jump is made to a label that doesn't occur (`Missing`), or a
--- label occurs twice in different positions (`Duplicate`).
+-- | Translation of 'LabelledOpcode' into 'PositionalOpcode' may fail if
+-- either a jump is made to a label that doesn't occur ('Missing'), or a
+-- label occurs twice in different positions ('Duplicate').
 data TranslateError
   = Missing [Label]
   | Duplicate [Label]
   deriving (Eq, Show)
 
-translate :: [LabelledOpcode] -> Either TranslateError [PositionedOpcode]
+-- | Translate a 'LabelledOpcode' into a list of 'PositionalOpcode' by
+-- replacing the labels with absolute positions. The positions are calculated
+-- using a fixed-point algorithm so that the size of a jump itself is accounted
+-- for.
+--
+-- Labelled jumps don't have a fixed size, but the size of a positional jump
+-- depends on the address being jumped to. So for example, if jumping to the
+-- 'JUMPDEST' on the 256th position in a list of 'LabelledOpcode', this
+-- requires a 'PUSH2' instruction which takes an additional byte of input,
+-- which pushes the 'JUMPDEST' one byte ahead.
+translate :: [LabelledOpcode] -> Either TranslateError [PositionalOpcode]
 translate opcodes = do
   labelMap <- labelPositions opcodes
   traverse (mapOpcodeM (om labelMap)) opcodes
@@ -120,7 +130,7 @@ labelPositions opcodes
       , labelMap
       , done )
 
--- | Complete difference: Get the elements of `xs` that do not occur in `ys`.
+-- | Complete difference: Get the elements of 'xs' that do not occur in 'ys'.
 missing :: Eq a => [a] -> [a] -> [a]
 missing xs ys = filter (`notElem` ys) xs
 

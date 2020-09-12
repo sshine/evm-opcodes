@@ -7,6 +7,8 @@ import Prelude hiding (LT, EQ, GT)
 import Data.Foldable (for_)
 
 import           Data.Char (isSpace)
+import           Data.DoubleWord (Word256)
+import           Data.TinyWord (Word2, Word4)
 import           Data.Text (Text)
 import qualified Data.Text as Text
 
@@ -14,11 +16,9 @@ import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
-import Data.TinyWord (Word2, Word4)
-import Data.LargeWord (Word256)
-import Network.Ethereum.Evm.Opcode as Opcode
-import Network.Ethereum.Evm.PositionedOpcode as P
-import Network.Ethereum.Evm.LabelledOpcode as L
+import EVM.Opcode as Opcode
+import EVM.Opcode.Positional as P
+import EVM.Opcode.Labelled as L
 
 import OpcodeGenerators
 

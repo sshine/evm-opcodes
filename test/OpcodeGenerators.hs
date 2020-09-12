@@ -3,6 +3,8 @@ module OpcodeGenerators where
 
 import Prelude hiding (LT, EQ, GT)
 
+import           Data.TinyWord (Word2, Word4)
+import           Data.DoubleWord (Word256)
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import           Data.Containers.ListUtils (nubOrd)
@@ -11,15 +13,13 @@ import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
-import Data.TinyWord (Word2, Word4)
-import Data.LargeWord (Word256)
-import Network.Ethereum.Evm.Opcode
-import Network.Ethereum.Evm.PositionedOpcode
-import Network.Ethereum.Evm.LabelledOpcode
-import Network.Ethereum.Evm.OpcodeTraversals
+import           EVM.Opcode
+import           EVM.Opcode.Positional
+import           EVM.Opcode.Labelled
+import           EVM.Opcode.Traversal
 
 -- | Generate a jump-free `Opcode` with zero arity.
-genOpcode0 :: Gen (AbstractOpcode a)
+genOpcode0 :: Gen (Opcode' a)
 genOpcode0 = Gen.frequency
   [ (length opcode0, Gen.element opcode0)
   , (length opcode1, Gen.choice opcode1)
@@ -27,24 +27,31 @@ genOpcode0 = Gen.frequency
   where
     opcode0 =
       [ STOP, ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, ADDMOD, MULMOD, EXP, SIGNEXTEND
-      , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE
+      , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE, SHL, SHR, SAR
       , SHA3
-      , ADDRESS, BALANCE, ORIGIN, CALLER, CALLVALUE, CALLDATALOAD, CALLDATASIZE, CALLDATACOPY, CODESIZE, CODECOPY, GASPRICE, EXTCODESIZE, EXTCODECOPY
-      , BLOCKHASH, COINBASE, TIMESTAMP, NUMBER, DIFFICULTY, GASLIMIT
+
+      , ADDRESS, BALANCE, ORIGIN
+      , CALLER, CALLVALUE, CALLDATALOAD, CALLDATASIZE, CALLDATACOPY
+      , CODESIZE, CODECOPY
+      , GASPRICE, EXTCODESIZE, EXTCODECOPY, RETURNDATASIZE, RETURNDATACOPY, EXTCODEHASH
+
+      , BLOCKHASH, COINBASE, TIMESTAMP, NUMBER, DIFFICULTY, GASLIMIT, CHAINID, SELFBALANCE
+
       , POP, MLOAD, MSTORE, MSTORE8, SLOAD, SSTORE {- , JUMP, JUMPI -}, PC, MSIZE, GAS {- , JUMPDEST -}
         {- , PUSH, DUP, SWAP, LOG -}
-      , CREATE, CALL, CALLCODE, RETURN, DELEGATECALL, SUICIDE
+      , CREATE, CALL, CALLCODE, RETURN, DELEGATECALL, CREATE2, STATICCALL, REVERT, INVALID, SELFDESTRUCT
       ]
+
     opcode1 =
       [ DUP <$> genWordN
       , SWAP <$> genWordN
       , LOG <$> genWordN
       ]
 
-genPushOpcode :: Gen (AbstractOpcode a)
+genPushOpcode :: Gen (Opcode' a)
 genPushOpcode = PUSH <$> genWord256
 
-genPositionalJump :: Gen PositionedOpcode
+genPositionalJump :: Gen PositionalOpcode
 genPositionalJump = Gen.choice
   [ JUMP <$> genWord256
   , JUMPI <$> genWord256

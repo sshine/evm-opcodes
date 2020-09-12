@@ -121,7 +121,7 @@ data Opcode' jumpdest
   | SWAP !Word4       -- ^ 0x90 - 0x9f (SWAP1-SWAP16)
 
   -- a0s: Logging Operations
-  | LOG !Word2        -- ^ 0x0a - 0xa4 (LOG0-LOG4)
+  | LOG !Word2        -- ^ 0x0a - 0xa4 (LOG1-LOG4)
 
   -- f0s: System Operations
   | CREATE            -- ^ 0xf0

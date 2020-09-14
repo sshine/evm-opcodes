@@ -5,15 +5,15 @@
 -- Maintainer: Simon Shine <shreddedglory@gmail.com>
 -- License: MIT
 --
--- This module exports two types, `Word2` and `Word4`, as wrappers around `Word8`.
+-- This module exports two types, 'Word2' and 'Word4', as wrappers around 'Word8'.
 
 module Data.TinyWord
   ( Word2, Word4
   , word2, word4
   ) where
 
-import Data.Bits
-import Data.Word
+import Data.Bits ((.&.))
+import Data.Word (Word8)
 import GHC.Enum (boundedEnumFrom, boundedEnumFromThen, toEnumError, succError, predError)
 
 newtype Word2 = Word2 { unWord2 :: Word8 } deriving (Eq, Ord)

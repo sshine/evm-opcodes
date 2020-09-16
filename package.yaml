@@ -25,7 +25,6 @@ dependencies:
 
 library:
   exposed-modules:
-    - Data.TinyWord
     - EVM.Opcode
     - EVM.Opcode.Positional
     - EVM.Opcode.Labelled

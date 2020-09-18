@@ -86,6 +86,6 @@ Right ["push1 255","jump","stop","stop","stop",...,"jumpdest"]
 λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 253 STOP <> [JUMPDEST "skip"])
 Right ["push2 257","jump","stop","stop","stop",...,"jumpdest"]
 
-λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 65535 STOP <> [JUMPDEST "skip"])
-Right ["push3 65540","jump","stop","stop",...,"jumpdest"]
+λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 65532 STOP <> [JUMPDEST "skip"])
+Right ["push3 65537","jump","stop","stop",...,"jumpdest"]
 ```

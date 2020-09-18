@@ -57,9 +57,10 @@ Right ["push1 1","jumpdest","dup1","iszero","push1 14","jumpi","push1 2","mul","
 ## Uses the right `push` instruction for absolute jumps
 
 When the byte address of a `jumpdest` exceeds a byte boundary of 255, 65535,
-and so on, then pushing a constant that refers to that address uses more space.
-This means that for absolute jumps (e.g. labelled jumps in a code generator),
-one must pick the right instructions among `push1`, `push2`, etc.
+and so on, then performing an absolute jump by pushing a constant that refers
+to that address uses more space.  This means that for absolute jumps (e.g.
+labelled jumps in a code generator), one must pick the right instructions among
+`push1`, `push2`, etc.
 
 This becomes a problem when a `jump` occurs before a `jumpdest`, since then the
 size of the `jump` will depend on its own presence in the code. And if there

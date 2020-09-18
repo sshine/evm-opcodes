@@ -20,6 +20,12 @@ concrete variants:
 
 The library has a fixpoint algorithm that translates labels into positions.
 
+## Naming opcodes
+
+TODO:
+ - Describe `DUP...`, `SWAP...`, `LOG...` synonyms.
+ - Describe how the library and its docs refer to `PUSH`, `push1`, etc.
+
 ## Example
 
 Imagine translating the following C program to EVM opcodes:
@@ -50,7 +56,7 @@ Right ["push1 1","jumpdest","dup1","iszero","push1 14","jumpi","push1 2","mul","
 
 ## Uses the right `push` instruction for absolute jumps
 
-When the byte address of a `JUMPDEST` exceeds a byte boundary of 255, 65535,
+When the byte address of a `jumpdest` exceeds a byte boundary of 255, 65535,
 and so on, then pushing a constant that refers to that address uses more space.
 This means that for absolute jumps (e.g. labelled jumps in a code generator),
 one must pick the right instructions among `push1`, `push2`, etc.

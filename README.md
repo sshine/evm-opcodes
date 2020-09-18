@@ -69,8 +69,8 @@ are many such `jump`s, this amounts to a bit of book-keeping.
 Expanding the gap of intermediate instructions between the `jump` and the
 `jumpdest`, e.g. as demonstrated below with `STOP` instructions, `L.translate`
 correctly computes the size of a labelled jump: Adding one `STOP` from 252 to
-253 only increases the number of bytes by 1, but `JUMPDEST "skip"` has now
-skipped a boundary:
+253 appears to be only adding a one-byte instruction, but `JUMPDEST "skip"` has
+now skipped a boundary:
 
 With 252 `SKIP`s there are 254 instructions that preceeds `JUMPDEST "skip"`: 3
 spent by `JUMP "skip"` (because it translates to `push1 255` and `jump`) and

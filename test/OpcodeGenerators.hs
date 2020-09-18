@@ -3,66 +3,54 @@ module OpcodeGenerators where
 
 import Prelude hiding (LT, EQ, GT)
 
-import           Data.TinyWord (Word2, Word4)
+import           Data.Bits (shift)
+import           Data.Containers.ListUtils (nubOrd)
 import           Data.DoubleWord (Word256)
 import           Data.Text (Text)
 import qualified Data.Text as Text
-import           Data.Containers.ListUtils (nubOrd)
 
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
-import           EVM.Opcode
+import           EVM.Opcode as Opcode
 import           EVM.Opcode.Positional
 import           EVM.Opcode.Labelled
 import           EVM.Opcode.Traversal
 
--- | Generate a jump-free `Opcode` with zero arity.
-genOpcode0 :: Gen (Opcode' a)
-genOpcode0 = Gen.frequency
-  [ (length opcode0, Gen.element opcode0)
-  , (length opcode1, Gen.choice opcode1)
-  ]
-  where
-    opcode0 =
-      [ STOP, ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, ADDMOD, MULMOD, EXP, SIGNEXTEND
-      , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE, SHL, SHR, SAR
-      , SHA3
+-- | Here are the three main strategies for generating testable opcodes:
+--
+--  1. 'genOpcode' will generate any 'Opcode'.
+--
+--  2. 'genOpcode'1' will generate any jump-free 'Opcode'' of 'opcodeSize' 1.
+--
+--  3. 'genLabelledOpcodes' will generate a sequence of opcodes for which
+--     all jumps are labelled and all jumps have valid jumpdests. Many jumps
+--     to the same jumpdest may occur, but the same jumpdest may not occur
+--     twice.
+--
 
-      , ADDRESS, BALANCE, ORIGIN
-      , CALLER, CALLVALUE, CALLDATALOAD, CALLDATASIZE, CALLDATACOPY
-      , CODESIZE, CODECOPY
-      , GASPRICE, EXTCODESIZE, EXTCODECOPY, RETURNDATASIZE, RETURNDATACOPY, EXTCODEHASH
-
-      , BLOCKHASH, COINBASE, TIMESTAMP, NUMBER, DIFFICULTY, GASLIMIT, CHAINID, SELFBALANCE
-
-      , POP, MLOAD, MSTORE, MSTORE8, SLOAD, SSTORE {- , JUMP, JUMPI -}, PC, MSIZE, GAS {- , JUMPDEST -}
-        {- , PUSH, DUP, SWAP, LOG -}
-      , CREATE, CALL, CALLCODE, RETURN, DELEGATECALL, CREATE2, STATICCALL, REVERT, INVALID, SELFDESTRUCT
-      ]
-
-    opcode1 =
-      [ DUP <$> genWordN
-      , SWAP <$> genWordN
-      , LOG <$> genWordN
-      ]
-
-genPushOpcode :: Gen (Opcode' a)
-genPushOpcode = PUSH <$> genWord256
-
-genPositionalJump :: Gen PositionalOpcode
-genPositionalJump = Gen.choice
-  [ JUMP <$> genWord256
-  , JUMPI <$> genWord256
-  , JUMPDEST <$> genWord256
+-- | Generate any 'Opcode'.
+genOpcode :: Gen Opcode
+genOpcode = Opcode.concrete <$> Gen.frequency
+  [ (3, genOpcode'1)
+  , (1, genPushOpcode)
+  , (1, genJumpyOpcode)
   ]
 
--- | Generate a list of `LabelledOpcode` where all JUMP/JUMPI have a JUMPDEST.
+-- | Generate a jump-free 'Opcode'' of 'opcodeSize' 1.
+--
+-- That means, no 'JUMP', 'JUMPI', 'JUMPDEST' or 'PUSH'.
+--
+-- Only jumps of type 'Opcode' have a clearly defined size.
+genOpcode'1 :: Gen (Opcode' a)
+genOpcode'1 = Gen.element opcode1
+
+-- | Generate a list of 'LabelledOpcode' where all 'JUMP' and 'JUMPI' have a 'JUMPDEST'.
 genLabelledOpcodes :: Gen [LabelledOpcode]
 genLabelledOpcodes = do
   opcodes <- Gen.list (Range.linear 0 40) genLabelledOpcode
-  let jumpdests = fmap JUMPDEST . nubOrd . foldMap extractLabel $ opcodes
+  let jumpdests = JUMPDEST <$> (nubOrd . foldMap extractLabel) opcodes
   Gen.shuffle (opcodes <> jumpdests)
   where
     extractLabel :: LabelledOpcode -> [Label]
@@ -70,37 +58,80 @@ genLabelledOpcodes = do
     extractLabel (JUMPI label) = [label]
     extractLabel _ = []
 
--- | Generate a `LabelledOpcode` that isn't JUMPDEST.
+-- | Generate a 'LabelledOpcode' that isn't 'JUMPDEST'.
 genLabelledOpcode :: Gen LabelledOpcode
 genLabelledOpcode = Gen.frequency
-  [ (1, genPushOpcode)
-  , (1, genLabelledJump)
-  , (3, genOpcode0)
+  [ (3, genOpcode'1)
+  , (1, genPushOpcode)
+  , (1, genLabelledJumpOpcode)
   ]
 
-genLabelledJump :: Gen LabelledOpcode
-genLabelledJump = Gen.choice [ JUMP <$> genLabel, JUMPI <$> genLabel ]
-
-genLabel :: Gen Text
-genLabel = Gen.text (Range.singleton 3) (Gen.element "xyz")
-
--- | Generate a Word of size N.
-genWordN :: (MonadGen m, Integral w, Bounded w) => m w
-genWordN = Gen.integral Range.constantBounded
-
--- | Generate a `Word256` with the number of bytes linearly
--- dependent on the generator's size and with the actual value being uniformly
--- distributed in the interval of available bytes, independent of the size:
+-- | Generate any jump-free 'Opcode''.
 --
--- 0 giving 0-255, 1 being 256-65535, and so on.
+-- That means, no 'JUMP', 'JUMPI', 'JUMPDEST'.
+genOpcodeN :: Gen (Opcode' a)
+genOpcodeN = Gen.frequency
+  [ (length opcode1, genOpcode'1)
+  , (1, genPushOpcode)
+  ]
+
+-- | A list of opcodes of byte size 1.
+--
+-- That means, no 'JUMP', 'JUMPI', 'JUMPDEST' or 'PUSH'.
+opcode1 :: [Opcode' a]
+opcode1 =
+  [ STOP, ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, ADDMOD, MULMOD, EXP, SIGNEXTEND
+  , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE, SHL, SHR, SAR
+  , SHA3
+
+  , ADDRESS, BALANCE, ORIGIN
+  , CALLER, CALLVALUE, CALLDATALOAD, CALLDATASIZE, CALLDATACOPY
+  , CODESIZE, CODECOPY
+  , GASPRICE, EXTCODESIZE, EXTCODECOPY, RETURNDATASIZE, RETURNDATACOPY, EXTCODEHASH
+
+  , BLOCKHASH, COINBASE, TIMESTAMP, NUMBER, DIFFICULTY, GASLIMIT, CHAINID, SELFBALANCE
+
+  , POP, MLOAD, MSTORE, MSTORE8, SLOAD, SSTORE {- , JUMP, JUMPI -}, PC, MSIZE, GAS {- , JUMPDEST -}
+    {- , PUSH -}
+  , CREATE, CALL, CALLCODE, RETURN, DELEGATECALL, CREATE2, STATICCALL, REVERT, INVALID, SELFDESTRUCT
+  ] <> map DUP [minBound..maxBound]
+    <> map SWAP [minBound..maxBound]
+    <> map LOG [minBound..maxBound]
+
+genPushOpcode :: Gen (Opcode' a)
+genPushOpcode = PUSH <$> genWord256
+
+genJumpyOpcode :: Gen Opcode
+genJumpyOpcode = Gen.element
+  [ jump
+  , jumpi
+  , jumpdest
+  ]
+
+genLabelledJumpOpcode :: Gen LabelledOpcode
+genLabelledJumpOpcode = Gen.choice
+  [ JUMP <$> genLabel
+  , JUMPI <$> genLabel
+  ]
+
+genLabel :: Gen Label
+genLabel = Gen.text (Range.singleton 5) (Gen.element "aeiomnr")
+
+-- | Generate a 'Word256' that needs N (1-32) bytes to represent itself, where
+-- N is linearly dependent on the generator's size. The value is distributed
+-- uniformly in that range.
+--
+-- For example, size 0 gives a value in the range 0-255, size 1 gives a value
+-- in the range 256-65535, and so on.
 genWord256 :: Gen Word256
 genWord256 = snd <$> genWord256'
 
--- | Generate a byte size and a `Word256` of that byte size.
+-- | Generate a @(n, k)@ pair where @n@ is 0-31 and @k@ is a 'Word256' that is
+-- @n + 1@ bytes.
 genWord256' :: Gen (Int, Word256)
 genWord256' = do
-  bytes <- Gen.integral (Range.linear 1 32)
-  let lo = 2 ^ (8 * (bytes - 1))
-      hi = 2 ^ (8 * bytes)
-  k <- pred <$> Gen.integral_ (Range.constant lo hi)
-  pure (bytes, k)
+  n <- Gen.integral (Range.linear 0 31)
+  let lo = (1 `shift` (8 * n)) - 1
+      hi = (1 `shift` (8 * (n + 1))) - 1
+  k <- Gen.integral_ (Range.constant lo hi)
+  pure (n, k)

@@ -21,7 +21,6 @@ dependencies:
   - cereal                     ^>= 0.5
   - data-dword                 ^>= 0.3
   - containers                 ^>= 0.6
-  - mtl                        ^>= 2.2
 
 library:
   exposed-modules:
@@ -43,3 +42,4 @@ tests:
       - tasty-hedgehog
       - hedgehog
       - hspec
+      - vector

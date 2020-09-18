@@ -16,16 +16,16 @@
 
 module EVM.Opcode.Positional where
 
-import Data.DoubleWord (Word256)
+import Data.Word (Word)
 
 import EVM.Opcode (Opcode, Opcode'(..), jump, jumpi, jumpdest, concrete, opcodeSize)
 
 -- | The position of an Opcode.
-type Position = Word256
+type Position = Word
 
--- | A `PositionalOpcode` has byte positions annotated at `JUMP`, `JUMPI`
--- and `JUMPDEST`; on `JUMP` and `JUMPI` the positions denote where they
--- jump to, and on `JUMPDEST` they denote the position of the opcode itself.
+-- | A 'PositionalOpcode' has byte positions annotated at 'JUMP', 'JUMPI'
+-- and 'JUMPDEST'; on 'JUMP' and 'JUMPI' the positions denote where they
+-- jump to, and on 'JUMPDEST' they denote the position of the opcode itself.
 type PositionalOpcode = Opcode' Position
 
 -- | Translate a 'PositionalOpcode' into an 'Opcode' by converting the position
@@ -34,9 +34,9 @@ translate :: [PositionalOpcode] -> [Opcode]
 translate = concatMap inline
   where
     inline :: PositionalOpcode -> [Opcode]
-    inline (JUMP addr) = [ PUSH addr, jump ]
-    inline (JUMPI addr) = [ PUSH addr, jumpi ]
-    inline (JUMPDEST _addr) = [ jumpdest ]
+    inline (JUMP addr) = [ PUSH (fromIntegral addr), jump ]
+    inline (JUMPI addr) = [ PUSH (fromIntegral addr), jumpi ]
+    inline (JUMPDEST _) = [ jumpdest ]
     inline opcode = [ concrete opcode ]
 
 -- | The size of a jump to some absolute position.

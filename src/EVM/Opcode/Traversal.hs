@@ -6,32 +6,25 @@
 -- Maintainer: Simon Shine <shreddedglory@gmail.com>
 -- License: MIT
 --
--- This module exposes generic methods of traversing 'Opcode''s.
+-- This module exposes a generic method of traversing 'Opcode''s.
 
 module EVM.Opcode.Traversal where
 
 import Prelude hiding (LT, EQ, GT)
-import Control.Monad.Identity
-
 import EVM.Opcode
 
-data OpcodeMapperM m a b = OpcodeMapperM
+data OpcodeMapper m a b = OpcodeMapper
   { mapOnJump     :: a -> m (Opcode' b)
   , mapOnJumpi    :: a -> m (Opcode' b)
-  , mapOnJumpDest :: a -> m (Opcode' b)
+  , mapOnJumpdest :: a -> m (Opcode' b)
   , mapOnOther    :: Opcode' a -> m (Maybe (Opcode' b))
   }
 
-type OpcodeMapper = OpcodeMapperM Identity
-
-mapOpcode :: OpcodeMapper a b -> Opcode' a -> Opcode' b
-mapOpcode mapper = runIdentity . mapOpcodeM mapper
-
-mapOpcodeM :: forall m a b. Monad m => OpcodeMapperM m a b -> Opcode' a -> m (Opcode' b)
+mapOpcodeM :: forall m a b. Monad m => OpcodeMapper m a b -> Opcode' a -> m (Opcode' b)
 mapOpcodeM mapper opcode = case opcode of
   JUMP a     -> mapOnJump mapper a
   JUMPI a    -> mapOnJumpi mapper a
-  JUMPDEST a -> mapOnJumpDest mapper a
+  JUMPDEST a -> mapOnJumpdest mapper a
 
   -- 0s: Stop and Arithmetic Operations
   STOP       -> mapOnOther' STOP STOP

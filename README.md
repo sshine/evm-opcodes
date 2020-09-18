@@ -47,3 +47,39 @@ Right [PUSH 1,JUMPDEST,DUP1,ISZERO,PUSH 14,JUMPI,PUSH 2,MUL,PUSH 2,JUMP,JUMPDEST
 λ> fmap opcodeText . P.translate <$> L.translate opcodes
 Right ["push1 1","jumpdest","dup1","iszero","push1 14","jumpi","push1 2","mul","push1 2","jump","jumpdest"]
 ```
+
+## Uses the right `push` instruction for absolute jumps
+
+When the byte address of a `JUMPDEST` exceeds a byte boundary of 255, 65535,
+and so on, then pushing a constant that refers to that address uses more space.
+This means that for absolute jumps (e.g. labelled jumps in a code generator),
+one must pick the right instructions among `push1`, `push2`, etc.
+
+Expanding the gap of intermediate instructions between the `jump` and the
+`jumpdest`, e.g. as demonstrated below with `STOP` instructions, `L.translate`
+correctly computes the size of a labelled jump: Adding one `STOP` from 252 to
+253 only increases the number of bytes by 1, but `JUMPDEST "skip"` has now
+skipped a boundary:
+
+With 252 `SKIP`s there are 254 instructions that preceeds `JUMPDEST "skip"`: 3
+spent by `JUMP "skip"` (because it translates to `push1 255` and `jump`) and
+252 `skip`s.
+
+With 253 `SKIP`s there are 257 instructions that preceeds `JUMPDEST "skip"`: 4
+spent by `JUMP "skip"` (because it translates to `push2 257` and `jump`) and
+253 `skip`s.
+
+```haskell
+λ> import EVM.Opcode
+λ> import EVM.Opcode.Labelled as L
+λ> import EVM.Opcode.Positional as P
+
+λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 252 STOP <> [JUMPDEST "skip"])
+Right ["push1 255","jump","stop","stop","stop",...,"jumpdest"]
+
+λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 253 STOP <> [JUMPDEST "skip"])
+Right ["push2 257","jump","stop","stop","stop",...,"jumpdest"]
+
+λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 65535 STOP <> [JUMPDEST "skip"])
+Right ["push3 65540","jump","stop","stop",...,"jumpdest"]
+```

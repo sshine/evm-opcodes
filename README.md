@@ -4,19 +4,18 @@ This Haskell library provides opcode types for the Ethereum Virtual Machine (EVM
 
 The library has two purposes:
 
- - To provide an interface between EVM-related libraries to lower the cost of
-   interoperability. This library has a very low ambition and dependency footprint.
- - To provide easy translation between labelled/positional jumps. Labelled jumps
-   can be most useful when generating EVM code, but actual EVM jump instructions
-   pop the address from the stack.
+ - Provide interface between EVM-related libraries: Lower cost of interoperability.
+ - Provide easy access to labelled jumps. Labelled jumps are most useful when
+   generating EVM code, but actual EVM `jump` instructions pop the address from
+   the stack.
 
-The library has one abstract type, `Opcode' a` where `a` is the annotation for
+The library has one abstract type, `Opcode' j` where `j` is the annotation for
 the jump-related instructions `JUMP`, `JUMPI` and `JUMPDEST`, and it has three
 concrete variants:
 
- - `Opcode` being `Opcode' ()`
- - `PositionalOpcode` being `Opcode' Word`
- - `LabelledOpcode` being `Opcode' Label` with `Label` being an alias for `Text`.
+ - `type Opcode = Opcode' ()`
+ - `type PositionalOpcode = Opcode' Word`
+ - `type LabelledOpcode = Opcode' Text`
 
 The library has a fixpoint algorithm that translates labelled jumps into
 positional jumps, and it has another function that translates those positional

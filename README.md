@@ -15,12 +15,12 @@ the jump-related instructions `JUMP`, `JUMPI` and `JUMPDEST`, and it has three
 concrete variants:
 
  - `Opcode` being `Opcode' ()`
- - `PositionalOpcode` being `Opcode' Word256`
+ - `PositionalOpcode` being `Opcode' Word`
  - `LabelledOpcode` being `Opcode' Label` with `Label` being an alias for `Text`.
 
 The library has a fixpoint algorithm that translates labelled jumps into
 positional jumps, and it has another function that translates those positional
-jumps into plain EVM opcodes where a constant it pushed before a jump is made.
+jumps into plain EVM opcodes where a constant is pushed before a jump is made.
 
 ## Naming opcodes
 

@@ -22,11 +22,24 @@ The library has a fixpoint algorithm that translates labelled jumps into
 positional jumps, and it has another function that translates those positional
 jumps into plain EVM opcodes where a constant is pushed before a jump is made.
 
-## Naming opcodes
+## Library conventions
 
-TODO:
- - Describe `DUP...`, `SWAP...`, `LOG...` synonyms.
- - Describe how the library and its docs refer to `PUSH`, `push1`, etc.
+When the documentation refers to a lowercase opcode (e.g. `push1`), then that
+means the EVM opcode. When the documentation instead refers to an uppercase
+opcode (e.g. `PUSH`), then that refers to the Haskell data constructor.
+
+While `dup1`-`dup16`, `swap1`-`swap16` and `log1`-`log4` were implemented using
+the data constructors `DUP`, `SWAP` and `LOG` that are not ergonomic to use but
+convenient for the library maintainer, pattern synonyms were made:
+
+ - `DUP1`, `DUP2`, ..., `DUP16`
+ - `SWAP1`, `SWAP2`, ..., `SWAP16`
+ - `LOG1`, `LOG2`, `LOG3`, `LOG4`
+
+When pushing a constant to the stack, EVM uses `push1`, `push2`, ..., `push32`
+where the number 1-32 refers to how many bytes the constant occupies. Instead
+of having 32 unique push commands, this library has a single `PUSH !Word256`
+constructor that serializes to the right `push1`, `push2`, etc.
 
 ## Example
 
@@ -56,43 +69,71 @@ Right [PUSH 1,JUMPDEST,DUP1,ISZERO,PUSH 14,JUMPI,PUSH 2,MUL,PUSH 2,JUMP,JUMPDEST
 Right ["push1 1","jumpdest","dup1","iszero","push1 14","jumpi","push1 2","mul","push1 2","jump","jumpdest"]
 ```
 
-## Uses the right `push` instruction for absolute jumps
+## Accounts for size of `PUSH`es when doing absolute jumps
 
-When the byte address of a `jumpdest` exceeds a byte boundary of 255, 65535,
-and so on, then performing an absolute jump by pushing a constant that refers
-to that address uses more space.  This means that for absolute jumps (e.g.
-labelled jumps in a code generator), one must pick the right instructions among
-`push1`, `push2`, etc.
+EVM's `jump` and `jumpi` instructions are parameterless. Instead they pop and
+jump to the address on the top of the stack. In order to perform absolute jumps
+in the code, it is necessary to `PUSH` an address on the stack first.  This is
+inconvenient, and so `PositionalOpcode` and `LabelledOpcode` are easier to use.
 
-This becomes a problem when a `jump` occurs before a `jumpdest`, since then the
-size of the `jump` will depend on its own presence in the code. And if there
-are many such `jump`s, this amounts to a bit of book-keeping.
+But what's more inconvenient is what happens to the offset of an absolute jump
+when the address being jumped to crosses a boundary where its byte index can no
+longer be represented by the same amount of bytes.
 
-Expanding the gap of intermediate instructions between the `jump` and the
-`jumpdest`, e.g. as demonstrated below with `STOP` instructions, `L.translate`
-correctly computes the size of a labelled jump: Adding one `STOP` from 252 to
-253 appears to be only adding a one-byte instruction, but `JUMPDEST "skip"` has
-now skipped a boundary:
+Take for example this EVM code:
 
-With 252 `SKIP`s there are 254 instructions that preceeds `JUMPDEST "skip"`: 3
-spent by `JUMP "skip"` (because it translates to `push1 255` and `jump`) and
-252 `skip`s.
+```
+0x00: push1 255
+0x02: jump
+0x03: stop
+0x04: stop
+0x05: stop
+...
+0xfe: stop
+0xff: jumpdest
+```
 
-With 253 `SKIP`s there are 257 instructions that preceeds `JUMPDEST "skip"`: 4
-spent by `JUMP "skip"` (because it translates to `push2 257` and `jump`) and
-253 `skip`s.
+which can be represented with the following `LabelledOpcode`:
 
 ```haskell
 λ> import EVM.Opcode
 λ> import EVM.Opcode.Labelled as L
 λ> import EVM.Opcode.Positional as P
 
-λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 252 STOP <> [JUMPDEST "skip"])
+λ> let opcodes = [JUMP "skip"] <> replicate 252 STOP <> [JUMPDEST "skip"]
+λ> fmap (fmap opcodeText . P.translate) (L.translate opcodes)
 Right ["push1 255","jump","stop","stop","stop",...,"jumpdest"]
+```
 
-λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 253 STOP <> [JUMPDEST "skip"])
+Note especially the byte size of a `PUSH 255` vs. a `PUSH 256`:
+
+```haskell
+λ> opcodeSize (PUSH 255)
+2
+λ> opcodeSize (PUSH 256)
+3
+```
+
+Then add another one-byte opcode between the `jump` and the `jumpdest`:
+
+```haskell
+λ> let opcodes = [JUMP "skip"] <> replicate 253 STOP <> [JUMPDEST "skip"]
+λ> fmap (fmap opcodeText . P.translate) (L.translate opcodes)
 Right ["push2 257","jump","stop","stop","stop",...,"jumpdest"]
+```
 
-λ> fmap opcodeText . P.translate <$> L.translate ([JUMP "skip"] <> replicate 65532 STOP <> [JUMPDEST "skip"])
-Right ["push3 65537","jump","stop","stop",...,"jumpdest"]
+Even though one byte was added, because the address of `jumpdest` is now
+greater than 255, all references to it now take more than 2 bytes. Concretely,
+one reference went from 2 bytes to 3 bytes, or rather, one `JUMP "skip"` became
+a `push2 257` instead of a `push1 255`. And if there were many such `jump`s,
+this amounts to a bit of book-keeping.
+
+This happens at subsequent boundaries as well. While this library handles each
+boundary the same way, it is unlikely to have EVM bytecode of more than a few
+kilobytes at present time.
+
+```haskell
+λ> let opcodes = [JUMP "skip"] <> replicate 65532 STOP <> [JUMPDEST "skip"]
+λ> fmap (fmap opcodeText . P.translate) (L.translate opcodes)
+Right ["push3 65537","jump","stop","stop","stop",...,"jumpdest"]
 ```

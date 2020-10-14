@@ -608,3 +608,8 @@ pattern SWAP13 = SWAP Ord16_13
 pattern SWAP14 = SWAP Ord16_14
 pattern SWAP15 = SWAP Ord16_15
 pattern SWAP16 = SWAP Ord16_16
+
+pattern LOG1 = LOG Ord4_1
+pattern LOG2 = LOG Ord4_2
+pattern LOG3 = LOG Ord4_3
+pattern LOG4 = LOG Ord4_4

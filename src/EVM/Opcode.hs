@@ -545,7 +545,7 @@ instance {-# OVERLAPPABLE #-} Show a => Show (Opcode' a) where
       showParam (JUMP a) = " " <> show a
       showParam (JUMPI a) = " " <> show a
       showParam (JUMPDEST a) = " " <> show a
-      showParam opcode = ""
+      showParam _opcode = ""
 
 -- | Calculate the size in bytes of an encoded opcode. The only 'Opcode'
 -- that uses more than one byte is 'PUSH'. Sizes are trivially determined
@@ -554,7 +554,7 @@ instance {-# OVERLAPPABLE #-} Show a => Show (Opcode' a) where
 -- completed.
 opcodeSize :: Num i => Opcode -> i
 opcodeSize (PUSH n) = List.genericLength . uncurry (:) $ push' n
-opcodeSize opcode = 1
+opcodeSize _opcode = 1
 
 -- | Pretty-print an 'Opcode' as a hexadecimal code ('Text').
 ppHex :: Opcode -> Text

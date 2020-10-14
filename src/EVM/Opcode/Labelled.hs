@@ -62,7 +62,7 @@ data TranslateError = TranslateError
 -- a 'PUSH2' instruction which uses an additional byte, which pushes the
 -- 'JUMPDEST' one byte ahead.
 
---translate :: [LabelledOpcode] -> Either TranslateError [PositionalOpcode]
+translate :: [LabelledOpcode] -> Either TranslateError [PositionalOpcode]
 translate opcodes = do
   labelMap <- labelPositions opcodes
   traverse (mapOpcodeM (myMapper (lookup' labelMap))) opcodes
@@ -85,8 +85,8 @@ translate opcodes = do
 labelPositions :: [LabelledOpcode] -> Either TranslateError (Map Label Position)
 labelPositions opcodes =
   case (jumps `missing` dests, duplicate dests) of
-    ([], [])   -> Right (fixpoint opcodes Map.empty)
-    (foo, bar) -> Left (TranslateError foo bar)
+    ([], []) -> Right (fixpoint opcodes Map.empty)
+    (missing', duplicate') -> Left (TranslateError missing' duplicate')
   where
     jumps :: [Label]
     jumps = mapMaybe jumpAnnot opcodes
@@ -102,7 +102,8 @@ labelPositions opcodes =
 --
 -- FIXME: Use 'Data.Function.fix'.
 fixpoint :: [LabelledOpcode] -> Map Label Position -> Map Label Position
-fixpoint opcodes labelMap = case step opcodes labelMap of
+fixpoint opcodes labelMap =
+  case step opcodes labelMap of
     (True, _, labelMap') -> labelMap'
     (False, _, labelMap') -> fixpoint opcodes labelMap'
 

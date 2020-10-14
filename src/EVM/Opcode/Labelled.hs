@@ -1,5 +1,4 @@
 {-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE LambdaCase #-}
 
 -- |
 -- Module: EVM.Opcode.Labelled

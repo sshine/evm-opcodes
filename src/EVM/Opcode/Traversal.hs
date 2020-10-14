@@ -13,6 +13,13 @@ module EVM.Opcode.Traversal where
 import Prelude hiding (LT, EQ, GT)
 import EVM.Opcode
 
+-- | An 'OpcodeMapper' is a collection of four mapping functions that can
+-- map any @'Opcode'' a@ to an @'Opcode'' b@. For each of the three opcodes
+-- that are annotated, 'JUMP', 'JUMPI' and 'JUMPDEST', a separate mapping
+-- function is specified, and for any other opcode, a general mapping function
+-- is specified that falls back to the same opcode of type @'Opcode'' b@.
+--
+-- See 'EVM.Opcode.Labelled.translate' for an example of usage.
 data OpcodeMapper m a b = OpcodeMapper
   { mapOnJump     :: a -> m (Opcode' b)
   , mapOnJumpi    :: a -> m (Opcode' b)
@@ -20,6 +27,7 @@ data OpcodeMapper m a b = OpcodeMapper
   , mapOnOther    :: Opcode' a -> m (Maybe (Opcode' b))
   }
 
+-- | Given an 'OpcodeMapper' and an @'Opcode'' a@, produce @m ('Opcode'' b)@.
 mapOpcodeM :: forall m a b. Monad m => OpcodeMapper m a b -> Opcode' a -> m (Opcode' b)
 mapOpcodeM mapper opcode = case opcode of
   JUMP a     -> mapOnJump mapper a

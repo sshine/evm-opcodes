@@ -364,27 +364,41 @@ opcodeSpec opcode = case opcode of
   INVALID      -> OpcodeSpec 0xfe 0 0 "invalid" -- α, δ are ∅
   SELFDESTRUCT -> OpcodeSpec 0xff 1 0 "selfdestruct"
 
-isDUP, isSWAP, isLOG  :: Word8 -> Bool
+-- | Determine if a byte represents a 'DUP' opcode ('DUP1' -- 'DUP16').
+isDUP  :: Word8 -> Bool
 isDUP = isJust . readDUP
+
+-- | Determine if a byte represents a 'SWAP' opcode ('SWAP1' -- 'SWAP16').
+isSWAP  :: Word8 -> Bool
 isSWAP = isJust . readSWAP
+
+-- | Determine if a byte represents a 'LOG' opcode ('LOG1' -- 'LOG4').
+isLOG  :: Word8 -> Bool
 isLOG = isJust . readLOG
 
+-- | Determine if a byte represents a 'PUSH' opcode.
 isPUSH :: Word8 -> ByteString -> Bool
 isPUSH b bs = isJust (readPUSH b bs)
 
-readDUP, readSWAP, readLOG :: Word8 -> Maybe Opcode
+-- | Read a 'DUP' opcode ('DUP1' -- 'DUP16') safely.
+readDUP :: Word8 -> Maybe Opcode
 readDUP b = do
   guard (b >= 0x80 && b <= 0x8f)
   pure (DUP (fromWord8 (b - 0x80)))
 
+-- | Read a 'SWAP' opcode ('SWAP1' -- 'SWAP16') safely.
+readSWAP :: Word8 -> Maybe Opcode
 readSWAP b = do
   guard (b >= 0x90 && b <= 0x9f)
   pure (SWAP (fromWord8 (b - 0x90)))
 
+-- | Read a 'LOG' opcode ('LOG1' -- 'LOG4') safely.
+readLOG :: Word8 -> Maybe Opcode
 readLOG b = do
   guard (b >= 0xa0 && b <= 0xa4)
   pure (LOG (fromWord8 (b - 0xa0)))
 
+-- | Read a 'PUSH' opcode safely.
 readPUSH :: Word8 -> ByteString -> Maybe Opcode
 readPUSH b bs = do
   guard (b >= 0x60 && b <= 0x7f)

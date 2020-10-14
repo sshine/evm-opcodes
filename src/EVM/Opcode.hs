@@ -22,7 +22,53 @@
 -- modify instructions is necessary. See comments in this module for the
 -- references to these additions.
 
-module EVM.Opcode where
+module EVM.Opcode
+  ( -- Types
+    Opcode
+  , Opcode'(..)
+  , OpcodeSpec(..)
+  , opcodeSpec
+
+    -- Pseudo-instructions
+  , jump
+  , jumpi
+  , jumpdest
+
+    -- Extraction
+  , jumpAnnot
+  , jumpdestAnnot
+
+    -- Parse and validate
+  , isDUP
+  , isSWAP
+  , isLOG
+  , isPUSH
+  , readDUP
+  , readSWAP
+  , readLOG
+  , readPUSH
+  , readOp
+
+    -- Conversion and printing
+  , concrete
+  , opcodeText
+  , opcodeSize
+  , ppHex
+  , showHex
+
+    -- Pattern synonyms
+  , pattern DUP1,  pattern DUP2,  pattern DUP3,  pattern DUP4
+  , pattern DUP5,  pattern DUP6,  pattern DUP7,  pattern DUP8
+  , pattern DUP9,  pattern DUP10, pattern DUP11, pattern DUP12
+  , pattern DUP13, pattern DUP14, pattern DUP15, pattern DUP16
+
+  , pattern SWAP1,  pattern SWAP2,  pattern SWAP3,  pattern SWAP4
+  , pattern SWAP5,  pattern SWAP6,  pattern SWAP7,  pattern SWAP8
+  , pattern SWAP9,  pattern SWAP10, pattern SWAP11, pattern SWAP12
+  , pattern SWAP13, pattern SWAP14, pattern SWAP15, pattern SWAP16
+
+  , pattern LOG1,  pattern LOG2,  pattern LOG3,  pattern LOG4
+  ) where
 
 import Prelude hiding (LT, EQ, GT)
 

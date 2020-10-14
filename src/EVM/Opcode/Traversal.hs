@@ -8,7 +8,10 @@
 --
 -- This module exposes a generic method of traversing 'Opcode''s.
 
-module EVM.Opcode.Traversal where
+module EVM.Opcode.Traversal
+  ( OpcodeMapper(..)
+  , mapOpcodeM
+  ) where
 
 import Prelude hiding (LT, EQ, GT)
 import EVM.Opcode

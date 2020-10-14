@@ -21,7 +21,7 @@ module EVM.Opcode.Labelled
   , translate
   ) where
 
-import           Data.List (null, filter, group, sort)
+import           Data.List (group, sort)
 import qualified Data.Map as Map
 import           Data.Map (Map)
 import           Data.Maybe (mapMaybe)
@@ -30,7 +30,7 @@ import           Data.Text (Text)
 
 import           EVM.Opcode (Opcode'(..), opcodeSize, jumpdest, concrete, jumpAnnot, jumpdestAnnot)
 import           EVM.Opcode.Positional (Position, PositionalOpcode, jumpSize)
-import           EVM.Opcode.Traversal
+import           EVM.Opcode.Traversal (OpcodeMapper(..), mapOpcodeM)
 
 -- | For now, all labels are 'Text'.
 type Label = Text

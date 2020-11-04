@@ -14,7 +14,12 @@
 -- determining the size of a jump is trivial when it's annotated with the
 -- destination address.
 
-module EVM.Opcode.Positional where
+module EVM.Opcode.Positional
+  ( Position
+  , PositionalOpcode
+  , translate
+  , jumpSize
+  ) where
 
 import Data.Word (Word)
 

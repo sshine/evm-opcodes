@@ -6,12 +6,12 @@ The library has two purposes:
 
  - Provide interface between EVM-related libraries: Lower cost of interoperability.
  - Provide easy access to labelled jumps. Labelled jumps are most useful when
-   generating EVM code, but actual EVM `jump` instructions pop the address from
-   the stack.
+   generating EVM code, but actual EVM `jump` instructions pop the destination
+   address from the stack.
 
-The library has one abstract type, `Opcode' j` where `j` is the annotation for
-the jump-related instructions `JUMP`, `JUMPI` and `JUMPDEST`, and it has three
-concrete variants:
+The library has one parameterised type, `Opcode' j` where `j` is the annotation
+for the jump-related instructions `JUMP`, `JUMPI` and `JUMPDEST`, and it has
+three concrete variants:
 
  - `type Opcode = Opcode' ()`
  - `type PositionalOpcode = Opcode' Word`

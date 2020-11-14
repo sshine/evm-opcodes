@@ -42,4 +42,3 @@ tests:
       - tasty-hedgehog
       - hedgehog
       - hspec
-      - vector

@@ -53,8 +53,9 @@ module EVM.Opcode
   , concrete
   , opcodeText
   , opcodeSize
-  , ppHex
-  , showHex
+  , toHex
+  , pack
+  , toBytes
 
     -- Pattern synonyms
   , pattern DUP1,  pattern DUP2,  pattern DUP3,  pattern DUP4
@@ -80,6 +81,7 @@ import qualified Data.ByteString as BS
 import           Data.DoubleWord (Word256, fromHiAndLo)
 import           Data.Maybe (isJust)
 import qualified Data.Serialize.Get as Cereal
+import           Data.String (IsString, fromString)
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.List as List
@@ -602,14 +604,20 @@ opcodeSize :: Num i => Opcode -> i
 opcodeSize (PUSH n) = List.genericLength . uncurry (:) $ push' n
 opcodeSize _opcode = 1
 
--- | Pretty-print an 'Opcode' as a hexadecimal code ('Text').
-ppHex :: Opcode -> Text
-ppHex = Text.pack . showHex
+-- | Convert a @['Opcode']@ to a string of ASCII hexadecimals.
+toHex :: IsString s => [Opcode] -> s
+toHex = fromString . List.concatMap (printf "%02x") . List.concatMap toBytes
 
--- | Pretty-print an 'Opcode' as a hexadecimal code ('String').
-showHex :: Opcode -> String
-showHex (PUSH n) = List.concatMap (printf "%02x") . uncurry (:) $ push' n
-showHex opcode = printf "%02x" . opcodeEncoding . opcodeSpec $ opcode
+-- | Convert a @['Opcode']@ to bytecode.
+pack :: [Opcode] -> ByteString
+pack = BS.pack . List.concatMap toBytes
+
+-- | Convert an @'Opcode'@ to a @['Word8']@.
+--
+-- To convert many 'Opcode's to bytecode, use 'pack'.
+toBytes :: Opcode -> [Word8]
+toBytes (PUSH n) = uncurry (:) (push' n)
+toBytes opcode = [ opcodeEncoding (opcodeSpec opcode) ]
 
 -- | Convert the constant argument of a 'PUSH' to the opcode encoding
 -- (0x60--0x7f) and its constant split into 'Word8' segments.

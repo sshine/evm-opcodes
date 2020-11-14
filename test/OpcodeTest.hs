@@ -1,18 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase #-}
 
 module OpcodeTest where
 
 import Prelude hiding (LT, EQ, GT)
 
 import           Data.Char (isSpace)
+import           Data.ByteString (index)
 import           Data.DoubleWord (Word256)
 import           Data.Foldable (for_)
 import           Data.Maybe (mapMaybe)
 import           Data.Text (Text)
 import qualified Data.Text as Text
-import           Data.Vector (Vector)
-import qualified Data.Vector as Vector
 
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -53,7 +51,6 @@ hprop_opcodeSpec_unique = property $ do
     then opcodeSpec opcode1 === opcodeSpec opcode2
     else opcodeSpec opcode1 /== opcodeSpec opcode2
 
--- FIXME: Organize these as a group of properties.
 hprop_translate_LabelledOpcode :: Property
 hprop_translate_LabelledOpcode = withTests 10000 $ property $ do
   labelledOpcodes <- forAll genLabelledOpcodes
@@ -65,14 +62,16 @@ hprop_translate_LabelledOpcode = withTests 10000 $ property $ do
   let pairs = zip labelledOpcodes positionalOpcodes
   fmap Opcode.concrete labelledOpcodes === fmap Opcode.concrete positionalOpcodes
 
-  -- Property: For every translated, positional jump, the corresponding index is a JUMPDEST.
-  --
-  -- FIXME: This test will work if indexing the byte code and checking for jumpdests.
-  --
-  -- let positions = mapMaybe jumpAnnot positionalOpcodes
-  -- let opcodes = Vector.fromList (P.translate positionalOpcodes)
-  -- for_ positions $ \pos ->
-  --   (Vector.!?) opcodes (fromIntegral pos) === Just jumpdest
+  -- Property: For every positional jump the corresponding index in the translated
+  -- bytecode is a JUMPDEST.
+  let positions = mapMaybe jumpAnnot positionalOpcodes
+  let opcodes = P.translate positionalOpcodes
+  let bytecode = Opcode.pack opcodes
+
+  -- FIXME: bytestring-0.11.0.0 has `indexMaybe` / `!?`.
+  -- bytecode !? fromIntegral pos === Just jumpdest
+  for_ positions $ \pos ->
+    [ bytecode `index` fromIntegral pos ] === toBytes jumpdest
 
   -- Property: JUMP/JUMPI near to a border (e.g. 254, 255, 256, 257) works.
   -- Depends on: Opcode generator where size determines size of N in JUMP -> PUSH_n.

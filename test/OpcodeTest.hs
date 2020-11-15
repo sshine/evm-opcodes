@@ -9,6 +9,7 @@ import           Data.Char (isSpace)
 import qualified Data.ByteString as BS
 import           Data.DoubleWord (Word256)
 import           Data.Foldable (for_)
+import           Data.List (permutations)
 import           Data.Maybe (mapMaybe)
 import           Data.Text (Text)
 import qualified Data.Text as Text
@@ -16,6 +17,7 @@ import qualified Data.Text as Text
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
+import           Test.Tasty.Hspec
 
 import EVM.Opcode as Opcode
 import EVM.Opcode.Positional as P
@@ -91,3 +93,62 @@ hprop_translate_LabelledOpcode = withTests 10000 $ property $ do
   let bytecode = Opcode.pack opcodes
   for_ (fromIntegral <$> positions) $ \pos ->
     [ bytecode `BS.index` pos ] === toBytes jumpdest
+
+-- Negative tests to assert that broken labels don't cause infinite recursion
+
+spec_EVM_Opcode_Labelled :: Spec
+spec_EVM_Opcode_Labelled = do
+  describe "translate" $ do
+    it "handles empty lists" $
+      L.translate [] `shouldBe` Right []
+
+    it "handles empty labels" $
+      L.translate [JUMP "", JUMPDEST ""] `shouldBe` Right [JUMP 3, JUMPDEST 3]
+
+    it "handles jumpdests with no pointers to it" $
+      L.translate [JUMPDEST "foo"] `shouldBe` Right [JUMPDEST 0]
+
+    it "fails on jumps without destinations" $ do
+      L.translate [JUMP "off"] `shouldMissErr` ["off"]
+      L.translate [JUMPI "off"] `shouldMissErr` ["off"]
+      L.translate [JUMP "a", JUMPI "b"] `shouldMissErr` ["a", "b"]
+
+      for_ (permutations [JUMP "a", JUMPDEST "a", JUMP "b"]) $
+        \instructions -> L.translate instructions `shouldMissErr` ["b"]
+
+    it "fails on single duplicate destination" $
+      L.translate [JUMPDEST "foo", JUMPDEST "foo"] `shouldDupErr` ["foo"]
+
+    it "fails on duplicate destination in presence of non-duplicate destination" $
+      for_ (permutations [JUMPDEST "foo", JUMPDEST "foo", JUMPDEST "bar"]) $
+        \instructions -> L.translate instructions `shouldDupErr` ["foo"]
+
+    it "fails on multiple duplicate destinations" $
+      let instructions = [JUMPDEST "foo", JUMPDEST "bar", JUMPDEST "foo", JUMPDEST "bar"]
+      in L.translate instructions `shouldDupErr` ["bar", "foo"]
+
+    it "fails and reports both jumps without destinations and duplicate destinations" $
+      let instructions = [JUMP "foo", JUMPDEST "bar", JUMPDEST "bar"]
+      in L.translate instructions `shouldBe` Left (TranslateError ["foo"] ["bar"])
+
+    it "fails and reports multiple jumps without destination and multiple duplicate destinations" $
+      let instructions =
+            [ JUMP "a"
+            , JUMP "b"
+            , JUMP "good"
+            , JUMPI "c"
+            , JUMPI "d"
+            , JUMPI "good"
+            , JUMPDEST "x"
+            , JUMPDEST "x"
+            , JUMPDEST "y"
+            , JUMPDEST "y"
+            , JUMPDEST "good"
+            ]
+          wildJumps = [ "a", "b", "c", "d" ]
+          duplicateDests = [ "x", "y" ]
+
+      in L.translate instructions `shouldBe` Left (TranslateError wildJumps duplicateDests)
+
+shouldMissErr x y = x `shouldBe` Left (TranslateError y [])
+shouldDupErr x y = x `shouldBe` Left (TranslateError [] y)

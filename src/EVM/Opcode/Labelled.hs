@@ -21,7 +21,7 @@ module EVM.Opcode.Labelled
   , translate
   ) where
 
-import           Data.List (group, sort)
+import           Data.List (group, sort, foldl')
 import qualified Data.Map as Map
 import           Data.Map (Map)
 import           Data.Maybe (mapMaybe)
@@ -108,7 +108,7 @@ fixpoint opcodes labelMap =
     (False, _, labelMap') -> fixpoint opcodes labelMap'
 
 step :: [LabelledOpcode] -> Map Label Position -> (Bool, Position, Map Label Position)
-step opcodes labelMap = foldl align (True, 0, labelMap) opcodes
+step opcodes labelMap = foldl' align (True, 0, labelMap) opcodes
 
 align :: (Bool, Position, Map Label Position) -> LabelledOpcode
       -> (Bool, Position, Map Label Position)

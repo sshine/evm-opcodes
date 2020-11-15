@@ -290,8 +290,8 @@ opcodeSpec opcode = case opcode of
   SMOD       -> OpcodeSpec 0x07 2 1 "smod"
   ADDMOD     -> OpcodeSpec 0x08 3 1 "addmod"
   MULMOD     -> OpcodeSpec 0x09 3 1 "mulmod"
-  EXP        -> OpcodeSpec 0x10 2 1 "exp"
-  SIGNEXTEND -> OpcodeSpec 0x11 2 1 "signextend"
+  EXP        -> OpcodeSpec 0x0a 2 1 "exp"
+  SIGNEXTEND -> OpcodeSpec 0x0b 2 1 "signextend"
 
   -- 10s: Comparison & Bitwise Logic Operations
   --                Hex  α δ

@@ -16,11 +16,11 @@ extra-source-files:
 
 dependencies:
   - base                        >= 4.12 && < 4.15
-  - text                       ^>= 1.2
   - bytestring                 ^>= 0.10
   - cereal                     ^>= 0.5
   - data-dword                 ^>= 0.3
   - containers                 ^>= 0.6
+  - text                       ^>= 1.2
 
 library:
   exposed-modules:

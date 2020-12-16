@@ -1,5 +1,7 @@
 # evm-opcodes
 
+![Haskell CI Status](https://github.com/sshine/evm-opcodes/workflows/Haskell%20CI/badge.svg)
+
 This Haskell library provides opcode types for the Ethereum Virtual Machine (EVM).
 
 The library has two purposes:

@@ -68,7 +68,7 @@ module EVM.Opcode
   , pattern SWAP9,  pattern SWAP10, pattern SWAP11, pattern SWAP12
   , pattern SWAP13, pattern SWAP14, pattern SWAP15, pattern SWAP16
 
-  , pattern LOG1,  pattern LOG2,  pattern LOG3,  pattern LOG4
+  , pattern LOG0, pattern LOG1, pattern LOG2, pattern LOG3, pattern LOG4
   ) where
 
 import Prelude hiding (LT, EQ, GT)
@@ -178,7 +178,7 @@ data Opcode' j
   | SWAP !Ord16        -- ^ 0x90 - 0x9f ('SWAP1' - 'SWAP16')
 
   -- a0s: Logging Operations
-  | LOG !Ord4         -- ^ 0x0a - 0xa4 ('LOG1' - 'LOG4')
+  | LOG !Ord5         -- ^ 0xa0 - 0xa4 ('LOG0' - 'LOG4')
 
   -- f0s: System Operations
   | CREATE            -- ^ 0xf0
@@ -218,20 +218,21 @@ jumpdestAnnot = \case
   JUMPDEST a -> Just a
   _ -> Nothing
 
--- | Convert an 'Ord4' or an 'Ord16' to a 'Word8'.
+-- | Convert an 'Ord5' or an 'Ord16' to a 'Word8'.
 toWord8 :: Enum e => e -> Word8
 toWord8 = fromIntegral . fromEnum
 
--- | Convert a 'Word8' to an 'Ord4' or an 'Ord16'.
+-- | Convert a 'Word8' to an 'Ord5' or an 'Ord16'.
 fromWord8 :: Enum e => Word8 -> e
 fromWord8 = toEnum . fromIntegral
 
--- | Convenience type of cardinality 4 for 'LOG'.
-data Ord4
-  = Ord4_1
-  | Ord4_2
-  | Ord4_3
-  | Ord4_4
+-- | Convenience type of cardinality 5 for 'LOG'.
+data Ord5
+  = Ord5_0
+  | Ord5_1
+  | Ord5_2
+  | Ord5_3
+  | Ord5_4
   deriving (Eq, Ord, Enum, Bounded)
 
 -- | Convenience type of cardinality 16 for 'DUP' and 'SWAP'.
@@ -396,7 +397,7 @@ opcodeSpec opcode = case opcode of
     in OpcodeSpec { opcodeEncoding = 0xa0 + wi
                   , opcodeAlpha    = wi + 2
                   , opcodeDelta    = 0
-                  , opcodeName     = "log" <> Text.pack (show (wi + 1))
+                  , opcodeName     = "log" <> Text.pack (show wi)
                   }
 
   -- f0s: System Operations
@@ -663,7 +664,8 @@ pattern SWAP14 = SWAP Ord16_14
 pattern SWAP15 = SWAP Ord16_15
 pattern SWAP16 = SWAP Ord16_16
 
-pattern LOG1 = LOG Ord4_1
-pattern LOG2 = LOG Ord4_2
-pattern LOG3 = LOG Ord4_3
-pattern LOG4 = LOG Ord4_4
+pattern LOG0 = LOG Ord5_0
+pattern LOG1 = LOG Ord5_1
+pattern LOG2 = LOG Ord5_2
+pattern LOG3 = LOG Ord5_3
+pattern LOG4 = LOG Ord5_4

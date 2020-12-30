@@ -25,16 +25,6 @@ import EVM.Opcode.Labelled as L
 
 import OpcodeGenerators
 
--- Until 'evalMaybe' is added to Hedgehog.
-import           GHC.Stack (HasCallStack, withFrozenCallStack)
-import           Hedgehog.Internal.Property (failWith)
-
--- https://github.com/hedgehogqa/haskell-hedgehog/pull/381
-evalMaybe :: (MonadTest m, Show a, HasCallStack) => Maybe a -> m a
-evalMaybe = \case
-  Nothing -> withFrozenCallStack $ failWith Nothing "the value was 'Nothing'"
-  Just x -> pure x
-
 -- Property: Jump-free non-PUSH opcodes have size 1.
 hprop_opcodeSize_1 :: Property
 hprop_opcodeSize_1 = property $ do

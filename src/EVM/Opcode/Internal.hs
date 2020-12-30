@@ -3,6 +3,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RankNTypes #-}
 
 -- |
 -- Module: EVM.Opcode.Internal
@@ -17,23 +18,13 @@ module EVM.Opcode.Internal where
 
 import Prelude hiding (LT, EQ, GT)
 
-import           Control.Applicative ((<|>))
-import           Control.Monad (void, guard)
+import           Control.Monad (void)
 import           Data.Bits (shift)
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString as BS
-import           Data.DoubleWord (Word256, fromHiAndLo)
-import           Data.Maybe (isJust)
-import qualified Data.Serialize.Get as Cereal
-import           Data.String (IsString, fromString)
+import           Data.DoubleWord (Word256)
 import           Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.List as List
-import           Data.Word (Word8, Word64)
-import           Text.Printf (printf)
-
--- | An 'Opcode' is a plain Ethereum VM Opcode.
-type Opcode = Opcode' ()
+import           Data.Word (Word8)
 
 -- | An 'Opcode'' is an Ethereum VM Opcode with parameterised jumps.
 --
@@ -571,45 +562,122 @@ push' i | i < 256 = (0x60, [fromIntegral i])
 push' i = (opcode + 1, arg <> [fromIntegral i])
   where (opcode, arg) = push' (i `shift` (-8))
 
--- | Pattern synonyms for 'DUP', 'SWAP' and 'LOG'.
+-- | Pattern synonyms for 'DUP'.
 --
 -- Use 'DUP1' instead of @'DUP' 'Ord16_1'@, etc.
+pattern DUP1 :: forall j. Opcode' j
 pattern DUP1 = DUP Ord16_1
+
+pattern DUP2 :: forall j. Opcode' j
 pattern DUP2 = DUP Ord16_2
+
+pattern DUP3 :: forall j. Opcode' j
 pattern DUP3 = DUP Ord16_3
+
+pattern DUP4 :: forall j. Opcode' j
 pattern DUP4 = DUP Ord16_4
+
+pattern DUP5 :: forall j. Opcode' j
 pattern DUP5 = DUP Ord16_5
+
+pattern DUP6 :: forall j. Opcode' j
 pattern DUP6 = DUP Ord16_6
+
+pattern DUP7 :: forall j. Opcode' j
 pattern DUP7 = DUP Ord16_7
+
+pattern DUP8 :: forall j. Opcode' j
 pattern DUP8 = DUP Ord16_8
+
+pattern DUP9 :: forall j. Opcode' j
 pattern DUP9 = DUP Ord16_9
+
+pattern DUP10 :: forall j. Opcode' j
 pattern DUP10 = DUP Ord16_10
+
+pattern DUP11 :: forall j. Opcode' j
 pattern DUP11 = DUP Ord16_11
+
+pattern DUP12 :: forall j. Opcode' j
 pattern DUP12 = DUP Ord16_12
+
+pattern DUP13 :: forall j. Opcode' j
 pattern DUP13 = DUP Ord16_13
+
+pattern DUP14 :: forall j. Opcode' j
 pattern DUP14 = DUP Ord16_14
+
+pattern DUP15 :: forall j. Opcode' j
 pattern DUP15 = DUP Ord16_15
+
+pattern DUP16 :: forall j. Opcode' j
 pattern DUP16 = DUP Ord16_16
 
+-- | Pattern synonyms for 'SWAP'.
+--
+-- Use 'SWAP1' instead of @'SWAP' 'Ord16_1'@, etc.
+pattern SWAP1 :: forall j. Opcode' j
 pattern SWAP1 = SWAP Ord16_1
+
+pattern SWAP2 :: forall j. Opcode' j
 pattern SWAP2 = SWAP Ord16_2
+
+pattern SWAP3 :: forall j. Opcode' j
 pattern SWAP3 = SWAP Ord16_3
+
+pattern SWAP4 :: forall j. Opcode' j
 pattern SWAP4 = SWAP Ord16_4
+
+pattern SWAP5 :: forall j. Opcode' j
 pattern SWAP5 = SWAP Ord16_5
+
+pattern SWAP6 :: forall j. Opcode' j
 pattern SWAP6 = SWAP Ord16_6
+
+pattern SWAP7 :: forall j. Opcode' j
 pattern SWAP7 = SWAP Ord16_7
+
+pattern SWAP8 :: forall j. Opcode' j
 pattern SWAP8 = SWAP Ord16_8
+
+pattern SWAP9 :: forall j. Opcode' j
 pattern SWAP9 = SWAP Ord16_9
+
+pattern SWAP10 :: forall j. Opcode' j
 pattern SWAP10 = SWAP Ord16_10
+
+pattern SWAP11 :: forall j. Opcode' j
 pattern SWAP11 = SWAP Ord16_11
+
+pattern SWAP12 :: forall j. Opcode' j
 pattern SWAP12 = SWAP Ord16_12
+
+pattern SWAP13 :: forall j. Opcode' j
 pattern SWAP13 = SWAP Ord16_13
+
+pattern SWAP14 :: forall j. Opcode' j
 pattern SWAP14 = SWAP Ord16_14
+
+pattern SWAP15 :: forall j. Opcode' j
 pattern SWAP15 = SWAP Ord16_15
+
+pattern SWAP16 :: forall j. Opcode' j
 pattern SWAP16 = SWAP Ord16_16
 
+-- | Pattern synonyms for 'LOG'.
+--
+-- Use 'LOG0' instead of @'LOG' 'Ord5_0'@, etc.
+pattern LOG0 :: forall j. Opcode' j
 pattern LOG0 = LOG Ord5_0
+
+pattern LOG1 :: forall j. Opcode' j
 pattern LOG1 = LOG Ord5_1
+
+pattern LOG2 :: forall j. Opcode' j
 pattern LOG2 = LOG Ord5_2
+
+pattern LOG3 :: forall j. Opcode' j
 pattern LOG3 = LOG Ord5_3
+
+pattern LOG4 :: forall j. Opcode' j
 pattern LOG4 = LOG Ord5_4

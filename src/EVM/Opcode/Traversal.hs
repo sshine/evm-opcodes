@@ -133,10 +133,9 @@ mapOpcodeM mapper opcode = case opcode of
   INVALID      -> mapOnOther' INVALID INVALID
   SELFDESTRUCT -> mapOnOther' SELFDESTRUCT SELFDESTRUCT
   where
-    mapOnOther' :: Monad m => Opcode' a -> Opcode' b -> m (Opcode' b)
+    mapOnOther' :: Opcode' a -> Opcode' b -> m (Opcode' b)
     mapOnOther' opa opbDefault = do
       res <- mapOnOther mapper opa
       case res of
         Just opb -> return opb
         Nothing  -> return opbDefault
-

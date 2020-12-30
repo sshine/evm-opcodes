@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 116cea12b4716b8b0cc3ec839586ba171fa46866b914982d185be5d61394dcbe
+-- hash: a7a1883c6dbab096f458e526caec677a134c7c3eb94a56b5482d58ecf9b8050a
 
 name:           evm-opcodes
 version:        0.1.0
@@ -31,6 +31,7 @@ library
       Paths_evm_opcodes
   hs-source-dirs:
       src
+  ghc-options: -Wall -Wnoncanonical-monad-instances -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       base >=4.12 && <4.15
     , bytestring >=0.10 && <0.11

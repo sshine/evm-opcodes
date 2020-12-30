@@ -30,6 +30,13 @@ library:
     - EVM.Opcode.Labelled
     - EVM.Opcode.Traversal
   source-dirs: src
+  ghc-options:
+    - -Wall
+    - -Wnoncanonical-monad-instances
+    - -Wcompat
+    - -Wincomplete-record-updates
+    - -Wincomplete-uni-patterns
+    - -Wredundant-constraints
 
 tests:
   test:

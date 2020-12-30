@@ -25,6 +25,7 @@ dependencies:
 library:
   exposed-modules:
     - EVM.Opcode
+    - EVM.Opcode.Internal
     - EVM.Opcode.Positional
     - EVM.Opcode.Labelled
     - EVM.Opcode.Traversal

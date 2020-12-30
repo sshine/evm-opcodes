@@ -150,5 +150,8 @@ spec_EVM_Opcode_Labelled = do
 
       in L.translate instructions `shouldBe` Left (TranslateError wildJumps duplicateDests)
 
+shouldMissErr :: (Show b, Eq b) => Either TranslateError b -> [Label] -> Expectation
 shouldMissErr x y = x `shouldBe` Left (TranslateError y [])
+
+shouldDupErr :: (Show b, Eq b) => Either TranslateError b -> [Label] -> Expectation
 shouldDupErr x y = x `shouldBe` Left (TranslateError [] y)

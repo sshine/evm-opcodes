@@ -18,6 +18,7 @@ import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import           Test.Tasty.Hspec
+import           Test.Hspec
 
 import EVM.Opcode as Opcode
 import EVM.Opcode.Positional as P

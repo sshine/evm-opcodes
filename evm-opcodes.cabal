@@ -10,13 +10,19 @@ synopsis:       Opcode types for Ethereum Virtual Machine (EVM)
 description:    This library provides opcode types for the Ethereum Virtual Machine.
 category:       Ethereum, Finance, Network
 homepage:       https://github.com/sshine/evm-opcodes
+bug-reports:    https://github.com/sshine/evm-opcodes/issues
 author:         Simon Shine
 maintainer:     shreddedglory@gmail.com
 copyright:      2020 Simon Shine
 license:        MIT
+license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
+
+source-repository head
+  type: git
+  location: https://github.com/sshine/evm-opcodes
 
 library
   exposed-modules:

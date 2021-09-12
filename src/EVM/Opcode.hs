@@ -20,13 +20,13 @@
 -- references to these additions.
 
 module EVM.Opcode 
-  ( -- Types
+  ( -- * Types
     Opcode
   , Opcode'(..)
   , OpcodeSpec(..)
   , opcodeSpec
 
-    -- Pseudo-instructions
+    -- ** Pseudo-instructions and helper functions
   , jump
   , jumpi
   , jumpdest
@@ -35,7 +35,15 @@ module EVM.Opcode
   , jumpAnnot
   , jumpdestAnnot
 
-    -- Parse and validate
+    -- ** Conversion and printing
+  , concrete
+  , opcodeText
+  , opcodeSize
+  , toHex
+  , pack
+  , toBytes
+
+    -- ** Parse and validate instructions
   , isDUP
   , isSWAP
   , isLOG
@@ -46,15 +54,7 @@ module EVM.Opcode
   , readPUSH
   , readOp
 
-    -- Conversion and printing
-  , concrete
-  , opcodeText
-  , opcodeSize
-  , toHex
-  , pack
-  , toBytes
-
-    -- Pattern synonyms
+    -- ** Pattern synonyms
   , pattern DUP1,  pattern DUP2,  pattern DUP3,  pattern DUP4
   , pattern DUP5,  pattern DUP6,  pattern DUP7,  pattern DUP8
   , pattern DUP9,  pattern DUP10, pattern DUP11, pattern DUP12
@@ -86,15 +86,13 @@ import           Text.Printf (printf)
 
 import EVM.Opcode.Internal
 
--- | An 'Opcode' is a plain Ethereum VM Opcode.
+-- | An 'Opcode' is a plain, parameterless Ethereum VM Opcode.
 type Opcode = Opcode' ()
 
 -- | Show 'PUSH' as the Haskell data constructor
 instance {-# OVERLAPPING #-} Show Opcode where
   show (PUSH n) = "PUSH " <> show n
   show opcode = Text.unpack (Text.toUpper (opcodeText opcode))
-
--- TODO: Express these as JUMP, JUMPI and JUMPDEST pattern synonyms that don't take arguments. Don't re-export the parameter-full ones here.
 
 -- | 'jump' is a plain parameterless 'Opcode'.
 jump :: Opcode

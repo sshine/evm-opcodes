@@ -28,7 +28,9 @@ import           Data.Word (Word8)
 -- | An 'Opcode'' is an Ethereum VM Opcode with parameterised jumps.
 --
 -- For a plain opcode using the basic EVM stack-based jumps, use 'Opcode'
--- instead. This type is used for defining and translating from opcodes
+-- instead.
+--
+-- This type is used for defining and translating from annotated opcodes, e.g.
 -- with labelled jumps.
 data Opcode' j
   -- 0s: Stop and Arithmetic Operations
@@ -354,122 +356,150 @@ push' i | i < 256 = (0x60, [fromIntegral i])
 push' i = (opcode + 1, arg <> [fromIntegral i])
   where (opcode, arg) = push' (i `shift` (-8))
 
--- | Pattern synonyms for 'DUP'.
---
--- Use 'DUP1' instead of @'DUP' 'Ord16_1'@, etc.
+-- | Use 'DUP1' instead of @'DUP' 'Ord16_1'@.
 pattern DUP1 :: forall j. Opcode' j
 pattern DUP1 = DUP Ord16_1
 
+-- | Use 'DUP2' instead of @'DUP' 'Ord16_2'@.
 pattern DUP2 :: forall j. Opcode' j
 pattern DUP2 = DUP Ord16_2
 
+-- | Use 'DUP3' instead of @'DUP' 'Ord16_3'@.
 pattern DUP3 :: forall j. Opcode' j
 pattern DUP3 = DUP Ord16_3
 
+-- | Use 'DUP4' instead of @'DUP' 'Ord16_4'@.
 pattern DUP4 :: forall j. Opcode' j
 pattern DUP4 = DUP Ord16_4
 
+-- | Use 'DUP5' instead of @'DUP' 'Ord16_5'@.
 pattern DUP5 :: forall j. Opcode' j
 pattern DUP5 = DUP Ord16_5
 
+-- | Use 'DUP6' instead of @'DUP' 'Ord16_6'@.
 pattern DUP6 :: forall j. Opcode' j
 pattern DUP6 = DUP Ord16_6
 
+-- | Use 'DUP7' instead of @'DUP' 'Ord16_7'@.
 pattern DUP7 :: forall j. Opcode' j
 pattern DUP7 = DUP Ord16_7
 
+-- | Use 'DUP8' instead of @'DUP' 'Ord16_8'@.
 pattern DUP8 :: forall j. Opcode' j
 pattern DUP8 = DUP Ord16_8
 
+-- | Use 'DUP9' instead of @'DUP' 'Ord16_9'@.
 pattern DUP9 :: forall j. Opcode' j
 pattern DUP9 = DUP Ord16_9
 
+-- | Use 'DUP10' instead of @'DUP' 'Ord16_10'@.
 pattern DUP10 :: forall j. Opcode' j
 pattern DUP10 = DUP Ord16_10
 
+-- | Use 'DUP11' instead of @'DUP' 'Ord16_11'@.
 pattern DUP11 :: forall j. Opcode' j
 pattern DUP11 = DUP Ord16_11
 
+-- | Use 'DUP12' instead of @'DUP' 'Ord16_12'@.
 pattern DUP12 :: forall j. Opcode' j
 pattern DUP12 = DUP Ord16_12
 
+-- | Use 'DUP13' instead of @'DUP' 'Ord16_13'@.
 pattern DUP13 :: forall j. Opcode' j
 pattern DUP13 = DUP Ord16_13
 
+-- | Use 'DUP14' instead of @'DUP' 'Ord16_14'@.
 pattern DUP14 :: forall j. Opcode' j
 pattern DUP14 = DUP Ord16_14
 
+-- | Use 'DUP15' instead of @'DUP' 'Ord16_15'@.
 pattern DUP15 :: forall j. Opcode' j
 pattern DUP15 = DUP Ord16_15
 
+-- | Use 'DUP16' instead of @'DUP' 'Ord16_16'@.
 pattern DUP16 :: forall j. Opcode' j
 pattern DUP16 = DUP Ord16_16
 
--- | Pattern synonyms for 'SWAP'.
---
--- Use 'SWAP1' instead of @'SWAP' 'Ord16_1'@, etc.
+-- | Use 'SWAP1' instead of @'SWAP' 'Ord16_1'@, etc.
 pattern SWAP1 :: forall j. Opcode' j
 pattern SWAP1 = SWAP Ord16_1
 
+-- | Use 'SWAP2' instead of @'SWAP' 'Ord16_2'@, etc.
 pattern SWAP2 :: forall j. Opcode' j
 pattern SWAP2 = SWAP Ord16_2
 
+-- | Use 'SWAP3' instead of @'SWAP' 'Ord16_3'@, etc.
 pattern SWAP3 :: forall j. Opcode' j
 pattern SWAP3 = SWAP Ord16_3
 
+-- | Use 'SWAP4' instead of @'SWAP' 'Ord16_4'@, etc.
 pattern SWAP4 :: forall j. Opcode' j
 pattern SWAP4 = SWAP Ord16_4
 
+-- | Use 'SWAP5' instead of @'SWAP' 'Ord16_5'@, etc.
 pattern SWAP5 :: forall j. Opcode' j
 pattern SWAP5 = SWAP Ord16_5
 
+-- | Use 'SWAP6' instead of @'SWAP' 'Ord16_6'@, etc.
 pattern SWAP6 :: forall j. Opcode' j
 pattern SWAP6 = SWAP Ord16_6
 
+-- | Use 'SWAP7' instead of @'SWAP' 'Ord16_7'@, etc.
 pattern SWAP7 :: forall j. Opcode' j
 pattern SWAP7 = SWAP Ord16_7
 
+-- | Use 'SWAP8' instead of @'SWAP' 'Ord16_8'@, etc.
 pattern SWAP8 :: forall j. Opcode' j
 pattern SWAP8 = SWAP Ord16_8
 
+-- | Use 'SWAP9' instead of @'SWAP' 'Ord16_9'@, etc.
 pattern SWAP9 :: forall j. Opcode' j
 pattern SWAP9 = SWAP Ord16_9
 
+-- | Use 'SWAP10' instead of @'SWAP' 'Ord16_10'@, etc.
 pattern SWAP10 :: forall j. Opcode' j
 pattern SWAP10 = SWAP Ord16_10
 
+-- | Use 'SWAP11' instead of @'SWAP' 'Ord16_11'@, etc.
 pattern SWAP11 :: forall j. Opcode' j
 pattern SWAP11 = SWAP Ord16_11
 
+-- | Use 'SWAP12' instead of @'SWAP' 'Ord16_12'@, etc.
 pattern SWAP12 :: forall j. Opcode' j
 pattern SWAP12 = SWAP Ord16_12
 
+-- | Use 'SWAP13' instead of @'SWAP' 'Ord16_13'@, etc.
 pattern SWAP13 :: forall j. Opcode' j
 pattern SWAP13 = SWAP Ord16_13
 
+-- | Use 'SWAP14' instead of @'SWAP' 'Ord16_14'@, etc.
 pattern SWAP14 :: forall j. Opcode' j
 pattern SWAP14 = SWAP Ord16_14
 
+-- | Use 'SWAP15' instead of @'SWAP' 'Ord16_15'@, etc.
 pattern SWAP15 :: forall j. Opcode' j
 pattern SWAP15 = SWAP Ord16_15
 
+-- | Use 'SWAP16' instead of @'SWAP' 'Ord16_16'@, etc.
 pattern SWAP16 :: forall j. Opcode' j
 pattern SWAP16 = SWAP Ord16_16
 
--- | Pattern synonyms for 'LOG'.
---
--- Use 'LOG0' instead of @'LOG' 'Ord5_0'@, etc.
+-- | Use 'LOG0' instead of @'LOG' 'Ord5_0'@.
 pattern LOG0 :: forall j. Opcode' j
 pattern LOG0 = LOG Ord5_0
 
+-- | Use 'LOG1' instead of @'LOG' 'Ord5_1'@.
 pattern LOG1 :: forall j. Opcode' j
 pattern LOG1 = LOG Ord5_1
 
+-- | Use 'LOG2' instead of @'LOG' 'Ord5_2'@.
 pattern LOG2 :: forall j. Opcode' j
 pattern LOG2 = LOG Ord5_2
 
+-- | Use 'LOG3' instead of @'LOG' 'Ord5_3'@.
 pattern LOG3 :: forall j. Opcode' j
 pattern LOG3 = LOG Ord5_3
 
+-- | Use 'LOG4' instead of @'LOG' 'Ord5_4'@.
 pattern LOG4 :: forall j. Opcode' j
 pattern LOG4 = LOG Ord5_4

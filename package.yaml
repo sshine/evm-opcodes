@@ -50,3 +50,12 @@ tests:
       - tasty-hedgehog
       - hedgehog
       - hspec
+
+benchmarks:
+  bench:
+    main: bench.hs
+    source-dirs: bench
+    dependencies:
+      - evm-opcodes
+      - tasty-bench
+    ghc-options: -O2

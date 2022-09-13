@@ -54,35 +54,60 @@ module EVM.Opcode
   , readOp
 
     -- ** Pattern synonyms
-  , pattern DUP1,  pattern DUP2,  pattern DUP3,  pattern DUP4
-  , pattern DUP5,  pattern DUP6,  pattern DUP7,  pattern DUP8
-  , pattern DUP9,  pattern DUP10, pattern DUP11, pattern DUP12
-  , pattern DUP13, pattern DUP14, pattern DUP15, pattern DUP16
+  , pattern DUP1
+  , pattern DUP2
+  , pattern DUP3
+  , pattern DUP4
+  , pattern DUP5
+  , pattern DUP6
+  , pattern DUP7
+  , pattern DUP8
+  , pattern DUP9
+  , pattern DUP10
+  , pattern DUP11
+  , pattern DUP12
+  , pattern DUP13
+  , pattern DUP14
+  , pattern DUP15
+  , pattern DUP16
+  , pattern SWAP1
+  , pattern SWAP2
+  , pattern SWAP3
+  , pattern SWAP4
+  , pattern SWAP5
+  , pattern SWAP6
+  , pattern SWAP7
+  , pattern SWAP8
+  , pattern SWAP9
+  , pattern SWAP10
+  , pattern SWAP11
+  , pattern SWAP12
+  , pattern SWAP13
+  , pattern SWAP14
+  , pattern SWAP15
+  , pattern SWAP16
+  , pattern LOG0
+  , pattern LOG1
+  , pattern LOG2
+  , pattern LOG3
+  , pattern LOG4
+  )
+where
 
-  , pattern SWAP1,  pattern SWAP2,  pattern SWAP3,  pattern SWAP4
-  , pattern SWAP5,  pattern SWAP6,  pattern SWAP7,  pattern SWAP8
-  , pattern SWAP9,  pattern SWAP10, pattern SWAP11, pattern SWAP12
-  , pattern SWAP13, pattern SWAP14, pattern SWAP15, pattern SWAP16
-
-  , pattern LOG0, pattern LOG1, pattern LOG2, pattern LOG3, pattern LOG4
-  ) where
-
-import Prelude hiding (LT, EQ, GT)
-
-import           Control.Applicative ((<|>))
-import           Control.Monad (guard)
-import           Data.ByteString (ByteString)
+import Control.Applicative ((<|>))
+import Control.Monad (guard)
+import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
-import           Data.DoubleWord (Word256, fromHiAndLo)
-import           Data.Maybe (isJust)
-import qualified Data.Serialize.Get as Cereal
-import           Data.String (IsString, fromString)
-import           Data.Text (Text)
+import Data.DoubleWord (Word256, fromHiAndLo)
 import qualified Data.List as List
-import           Data.Word (Word8, Word64)
-import           Text.Printf (printf)
-
+import Data.Maybe (isJust)
+import qualified Data.Serialize.Get as Cereal
+import Data.String (IsString, fromString)
+import Data.Text (Text)
+import Data.Word (Word64, Word8)
 import EVM.Opcode.Internal
+import Text.Printf (printf)
+import Prelude hiding (EQ, GT, LT)
 
 -- | An 'Opcode' is a plain, parameterless Ethereum VM Opcode.
 type Opcode = Opcode' ()
@@ -100,15 +125,15 @@ jumpdest :: Opcode
 jumpdest = JUMPDEST ()
 
 -- | Determine if a byte represents a 'DUP' opcode ('DUP1' -- 'DUP16').
-isDUP  :: Word8 -> Bool
+isDUP :: Word8 -> Bool
 isDUP = isJust . readDUP
 
 -- | Determine if a byte represents a 'SWAP' opcode ('SWAP1' -- 'SWAP16').
-isSWAP  :: Word8 -> Bool
+isSWAP :: Word8 -> Bool
 isSWAP = isJust . readSWAP
 
 -- | Determine if a byte represents a 'LOG' opcode ('LOG1' -- 'LOG4').
-isLOG  :: Word8 -> Bool
+isLOG :: Word8 -> Bool
 isLOG = isJust . readLOG
 
 -- | Determine if a byte represents a 'PUSH' opcode.

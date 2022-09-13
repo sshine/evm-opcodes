@@ -1,7 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RankNTypes #-}
 
 -- |
@@ -14,15 +14,14 @@
 
 module EVM.Opcode.Internal where
 
-import Prelude hiding (LT, EQ, GT)
-
-import           Control.Monad (void)
-import           Data.Bits (shift)
-import           Data.DoubleWord (Word256)
-import           Data.Text (Text)
-import qualified Data.Text as Text
+import Control.Monad (void)
+import Data.Bits (shift)
+import Data.DoubleWord (Word256)
 import qualified Data.List as List
-import           Data.Word (Word8)
+import Data.Text (Text)
+import qualified Data.Text as Text
+import Data.Word (Word8)
+import Prelude hiding (EQ, GT, LT)
 
 -- | An 'Opcode'' is an Ethereum VM Opcode with parameterised jumps.
 --
@@ -179,8 +178,8 @@ data Ord16
   | Ord16_9
   | Ord16_10
   | Ord16_11
-  | Ord16_12
-  | Ord16_13
+  | Ord16_12
+  | Ord16_13
   | Ord16_14
   | Ord16_15
   | Ord16_16
@@ -356,7 +355,8 @@ instance Show a => Show (Opcode' a) where
 push' :: Word256 -> (Word8, [Word8])
 push' i | i < 256 = (0x60, [fromIntegral i])
 push' i = (opcode + 1, arg <> [fromIntegral i])
-  where (opcode, arg) = push' (i `shift` (-8))
+  where
+    (opcode, arg) = push' (i `shift` (-8))
 
 -- | Use 'DUP1' instead of @'DUP' 'Ord16_1'@.
 pattern DUP1 :: forall j. Opcode' j

@@ -21,7 +21,7 @@ module EVM.Opcode.Positional
   , jumpSize
   ) where
 
-import EVM.Opcode (Opcode, Opcode'(..), jump, jumpi, jumpdest, concrete, opcodeSize)
+import EVM.Opcode (Opcode, Opcode' (..), concrete, jump, jumpdest, jumpi, opcodeSize)
 
 -- | The position of an Opcode.
 type Position = Word

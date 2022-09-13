@@ -22,17 +22,16 @@ module EVM.Opcode.Labelled
   , labelPositions
   ) where
 
-import           Data.Function (fix)
-import           Data.List (group, sort, foldl')
+import Data.Function (fix)
+import Data.List (foldl', group, sort)
+import Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Map (Map)
-import           Data.Maybe (mapMaybe)
+import Data.Maybe (mapMaybe)
 import qualified Data.Set as Set
-import           Data.Text (Text)
-
-import           EVM.Opcode (Opcode'(..), opcodeSize, jumpdest, concrete, jumpAnnot, jumpdestAnnot)
-import           EVM.Opcode.Positional (Position, PositionalOpcode, jumpSize)
-import           EVM.Opcode.Traversal (OpcodeMapper(..), mapOpcodeM)
+import Data.Text (Text)
+import EVM.Opcode (Opcode' (..), concrete, jumpAnnot, jumpdest, jumpdestAnnot, opcodeSize)
+import EVM.Opcode.Positional (Position, PositionalOpcode, jumpSize)
+import EVM.Opcode.Traversal (OpcodeMapper (..), mapOpcodeM)
 
 -- | For now, all labels are 'Text'.
 type Label = Text

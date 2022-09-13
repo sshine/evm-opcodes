@@ -13,8 +13,8 @@ module EVM.Opcode.Traversal
   , mapOpcodeM
   ) where
 
-import Prelude hiding (LT, EQ, GT)
 import EVM.Opcode
+import Prelude hiding (EQ, GT, LT)
 
 -- | An 'OpcodeMapper' is a collection of four mapping functions that can
 -- map any @'Opcode'' a@ to an @'Opcode'' b@. For each of the three opcodes
@@ -138,4 +138,4 @@ mapOpcodeM mapper opcode = case opcode of
       res <- mapOnOther mapper opa
       case res of
         Just opb -> return opb
-        Nothing  -> return opbDefault
+        Nothing -> return opbDefault

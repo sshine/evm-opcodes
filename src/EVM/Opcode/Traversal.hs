@@ -2,8 +2,8 @@
 
 -- |
 -- Module: EVM.Opcode.Traversal
--- Copyright: 2018 Simon Shine
--- Maintainer: Simon Shine <shreddedglory@gmail.com>
+-- Copyright: 2018-2022 Simon Shine
+-- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --
 -- This module exposes a generic method of traversing 'Opcode''s.

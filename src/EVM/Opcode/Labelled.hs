@@ -2,8 +2,8 @@
 
 -- |
 -- Module: EVM.Opcode.Labelled
--- Copyright: 2018 Simon Shine
--- Maintainer: Simon Shine <shreddedglory@gmail.com>
+-- Copyright: 2018-2022 Simon Shine
+-- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --
 -- This module exposes the 'LabelledOpcode' type for expressing Ethereum VM

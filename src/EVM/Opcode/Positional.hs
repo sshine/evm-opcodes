@@ -1,7 +1,7 @@
 -- |
 -- Module: EVM.Opcode.Positional
--- Copyright: 2018 Simon Shine
--- Maintainer: Simon Shine <shreddedglory@gmail.com>
+-- Copyright: 2018-2022 Simon Shine
+-- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --
 -- This module exposes the `PositionalOpcode` type for expressing Ethereum

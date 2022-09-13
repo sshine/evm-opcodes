@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE PatternSynonyms #-}
 
 -- |
@@ -79,7 +78,6 @@ import           Data.Maybe (isJust)
 import qualified Data.Serialize.Get as Cereal
 import           Data.String (IsString, fromString)
 import           Data.Text (Text)
-import qualified Data.Text as Text
 import qualified Data.List as List
 import           Data.Word (Word8, Word64)
 import           Text.Printf (printf)
@@ -88,11 +86,6 @@ import EVM.Opcode.Internal
 
 -- | An 'Opcode' is a plain, parameterless Ethereum VM Opcode.
 type Opcode = Opcode' ()
-
--- | Show 'PUSH' as the Haskell data constructor
-instance {-# OVERLAPPING #-} Show Opcode where
-  show (PUSH n) = "PUSH " <> show n
-  show opcode = Text.unpack (Text.toUpper (opcodeText opcode))
 
 -- | 'jump' is a plain parameterless 'Opcode'.
 jump :: Opcode

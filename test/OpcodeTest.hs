@@ -92,6 +92,10 @@ spec_EVM_Opcode_Labelled = do
     it "handles empty lists" $
       L.translate [] `shouldBe` Right []
 
+    it "handles instructions without jumps" $ do
+      L.translate [STOP] `shouldBe` Right [STOP]
+      L.translate [PUSH 2, PUSH 2, ADD] `shouldBe` Right [PUSH 2, PUSH 2, ADD]
+
     it "handles empty labels" $
       L.translate [JUMP "", JUMPDEST ""] `shouldBe` Right [JUMP 3, JUMPDEST 3]
 
@@ -139,6 +143,118 @@ spec_EVM_Opcode_Labelled = do
           duplicateDests = [ "x", "y" ]
 
       in L.translate instructions `shouldBe` Left (TranslateError wildJumps duplicateDests)
+
+spec_Show_for_Opcode :: Spec
+spec_Show_for_Opcode =
+  describe "show" $ do
+    -- 0s: Stop and Arithmetic Operations
+    it "shows STOP" $ show' STOP `shouldBe` "STOP"
+    it "shows ADD" $ show' ADD `shouldBe` "ADD"
+    it "shows MUL" $ show' MUL `shouldBe` "MUL"
+    it "shows SUB" $ show' SUB `shouldBe` "SUB"
+    it "shows DIV" $ show' DIV `shouldBe` "DIV"
+    it "shows SDIV" $ show' SDIV `shouldBe` "SDIV"
+    it "shows MOD" $ show' MOD `shouldBe` "MOD"
+    it "shows SMOD" $ show' SMOD `shouldBe` "SMOD"
+    it "shows ADDMOD" $ show' ADDMOD `shouldBe` "ADDMOD"
+    it "shows MULMOD" $ show' MULMOD `shouldBe` "MULMOD"
+    it "shows EXP" $ show' EXP `shouldBe` "EXP"
+    it "shows SIGNEXTEND" $ show' SIGNEXTEND `shouldBe` "SIGNEXTEND"
+
+    -- 10s: Comparison & Bitwise Logic Operations
+    it "shows LT" $ show' LT `shouldBe` "LT"
+    it "shows GT" $ show' GT `shouldBe` "GT"
+    it "shows SLT" $ show' SLT `shouldBe` "SLT"
+    it "shows SGT" $ show' SGT `shouldBe` "SGT"
+    it "shows EQ" $ show' EQ `shouldBe` "EQ"
+    it "shows ISZERO" $ show' ISZERO `shouldBe` "ISZERO"
+    it "shows AND" $ show' AND `shouldBe` "AND"
+    it "shows OR" $ show' OR `shouldBe` "OR"
+    it "shows XOR" $ show' XOR `shouldBe` "XOR"
+    it "shows NOT" $ show' NOT `shouldBe` "NOT"
+    it "shows BYTE" $ show' BYTE `shouldBe` "BYTE"
+    it "shows SHL" $ show' SHL `shouldBe` "SHL"
+    it "shows SHR" $ show' SHR `shouldBe` "SHR"
+    it "shows SAR" $ show' SAR `shouldBe` "SAR"
+
+    -- 20s: SHA3
+    it "shows SHA3" $ show' SHA3 `shouldBe` "SHA3"
+
+    -- 30s: Environmental Information
+    it "shows ADDRESS" $ show' ADDRESS `shouldBe` "ADDRESS"
+    it "shows BALANCE" $ show' BALANCE `shouldBe` "BALANCE"
+    it "shows ORIGIN" $ show' ORIGIN `shouldBe` "ORIGIN"
+    it "shows CALLER" $ show' CALLER `shouldBe` "CALLER"
+    it "shows CALLVALUE" $ show' CALLVALUE `shouldBe` "CALLVALUE"
+    it "shows CALLDATALOAD" $ show' CALLDATALOAD `shouldBe` "CALLDATALOAD"
+    it "shows CALLDATASIZE" $ show' CALLDATASIZE `shouldBe` "CALLDATASIZE"
+    it "shows CALLDATACOPY" $ show' CALLDATACOPY `shouldBe` "CALLDATACOPY"
+    it "shows CODESIZE" $ show' CODESIZE `shouldBe` "CODESIZE"
+    it "shows CODECOPY" $ show' CODECOPY `shouldBe` "CODECOPY"
+    it "shows GASPRICE" $ show' GASPRICE `shouldBe` "GASPRICE"
+    it "shows EXTCODESIZE" $ show' EXTCODESIZE `shouldBe` "EXTCODESIZE"
+    it "shows EXTCODECOPY" $ show' EXTCODECOPY `shouldBe` "EXTCODECOPY"
+    it "shows RETURNDATASIZE" $ show' RETURNDATASIZE `shouldBe` "RETURNDATASIZE"
+    it "shows RETURNDATACOPY" $ show' RETURNDATACOPY `shouldBe` "RETURNDATACOPY"
+    it "shows EXTCODEHASH" $ show' EXTCODEHASH `shouldBe` "EXTCODEHASH"
+
+    -- 40s: Block Information
+    it "shows BLOCKHASH" $ show' BLOCKHASH `shouldBe` "BLOCKHASH"
+    it "shows COINBASE" $ show' COINBASE `shouldBe` "COINBASE"
+    it "shows TIMESTAMP" $ show' TIMESTAMP `shouldBe` "TIMESTAMP"
+    it "shows NUMBER" $ show' NUMBER `shouldBe` "NUMBER"
+    it "shows DIFFICULTY" $ show' DIFFICULTY `shouldBe` "DIFFICULTY"
+    it "shows GASLIMIT" $ show' GASLIMIT `shouldBe` "GASLIMIT"
+    it "shows CHAINID" $ show' CHAINID `shouldBe` "CHAINID"
+    it "shows SELFBALANCE" $ show' SELFBALANCE `shouldBe` "SELFBALANCE"
+
+    -- 50s: Stack, Memory, Storage and Flow Operations
+    it "shows POP" $ show' POP `shouldBe` "POP"
+    it "shows MLOAD" $ show' MLOAD `shouldBe` "MLOAD"
+    it "shows MSTORE" $ show' MSTORE `shouldBe` "MSTORE"
+    it "shows MSTORE8" $ show' MSTORE8 `shouldBe` "MSTORE8"
+    it "shows SLOAD" $ show' SLOAD `shouldBe` "SLOAD"
+    it "shows SSTORE" $ show' SSTORE `shouldBe` "SSTORE"
+    it "shows JUMP" $ show' (JUMP ()) `shouldBe` "JUMP ()"
+    it "shows JUMPI" $ show' (JUMPI ()) `shouldBe` "JUMPI ()"
+    it "shows PC" $ show' PC `shouldBe` "PC"
+    it "shows MSIZE" $ show' MSIZE `shouldBe` "MSIZE"
+    it "shows GAS" $ show' GAS `shouldBe` "GAS"
+    it "shows JUMPDEST" $ show' (JUMPDEST ()) `shouldBe` "JUMPDEST ()"
+
+    -- 60s & 70s: Push Operations
+    for_ [0, 255, 256, 65535, 65536] $ \i ->
+      it ("shows PUSH " <> show i) $ show' (PUSH i) `shouldBe` "PUSH " <> show i
+
+    -- 80s: Duplication Operations (DUP)
+    for_ [minBound..maxBound] $ \nth -> do
+      let i = fromEnum nth + 1
+      it ("shows DUP" <> show i) $ show' (DUP nth) `shouldBe` ("DUP" <> show i)
+
+    -- 90s: Exchange operations (SWAP)
+    for_ [minBound..maxBound] $ \nth -> do
+      let i = fromEnum nth + 1
+      it ("shows DUP" <> show i) $ show' (SWAP nth) `shouldBe` ("SWAP" <> show i)
+
+    -- a0s: Logging Operations (LOG)
+    for_ [minBound..maxBound] $ \nth -> do
+      let i = fromEnum nth
+      it ("shows DUP" <> show i) $ show' (LOG nth) `shouldBe` ("LOG" <> show i)
+
+    -- f0s: System Operations
+    it "shows CREATE" $ show' CREATE `shouldBe` "CREATE"
+    it "shows CALL" $ show' CALL `shouldBe` "CALL"
+    it "shows CALLCODE" $ show' CALLCODE `shouldBe` "CALLCODE"
+    it "shows RETURN" $ show' RETURN `shouldBe` "RETURN"
+    it "shows DELEGATECALL" $ show' DELEGATECALL `shouldBe` "DELEGATECALL"
+    it "shows CREATE2" $ show' CREATE2 `shouldBe` "CREATE2"
+    it "shows STATICCALL" $ show' STATICCALL `shouldBe` "STATICCALL"
+    it "shows REVERT" $ show' REVERT `shouldBe` "REVERT"
+    it "shows INVALID" $ show' INVALID `shouldBe` "INVALID"
+    it "shows SELFDESTRUCT" $ show' SELFDESTRUCT `shouldBe` "SELFDESTRUCT"
+  where
+    show' :: Opcode -> String
+    show' = show
 
 shouldMissErr :: (Show b, Eq b) => Either TranslateError b -> [Label] -> Expectation
 shouldMissErr x y = x `shouldBe` Left (TranslateError y [])

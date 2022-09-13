@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE LambdaCase #-}
@@ -110,7 +109,11 @@ data Opcode' j
 
   -- 60s & 70s: Push Operations
   | PUSH !Word256     -- ^ 0x60 - 0x7f (PUSH1 - PUSH32)
+
+  -- 80s: Duplication Operations (DUP)
   | DUP !Ord16         -- ^ 0x80 - 0x8f ('DUP1' - 'DUP16')
+
+  -- 90s: Exchange operations (SWAP)
   | SWAP !Ord16        -- ^ 0x90 - 0x9f ('SWAP1' - 'SWAP16')
 
   -- a0s: Logging Operations
@@ -341,13 +344,12 @@ opcodeSpec opcode = case opcode of
   INVALID      -> OpcodeSpec 0xfe 0 0 "invalid" -- α, δ are ∅
   SELFDESTRUCT -> OpcodeSpec 0xff 1 0 "selfdestruct"
 
-instance {-# OVERLAPPABLE #-} Show a => Show (Opcode' a) where
-  show opcode = show (concrete opcode) <> showParam opcode
-    where
-      showParam (JUMP a) = " " <> show a
-      showParam (JUMPI a) = " " <> show a
-      showParam (JUMPDEST a) = " " <> show a
-      showParam _opcode = ""
+instance Show a => Show (Opcode' a) where
+  show (PUSH n) = "PUSH " <> show n
+  show (JUMP j) = "JUMP " <> show j
+  show (JUMPI j) = "JUMPI " <> show j
+  show (JUMPDEST j) = "JUMPDEST " <> show j
+  show opcode = Text.unpack (Text.toUpper (opcodeName (opcodeSpec opcode)))
 
 -- | Convert the constant argument of a 'PUSH' to the opcode encoding
 -- (0x60--0x7f) and its constant split into 'Word8' segments.

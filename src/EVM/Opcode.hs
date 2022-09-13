@@ -293,8 +293,8 @@ opcodeText = opcodeName . opcodeSpec
 -- | Calculate the size in bytes of an encoded opcode. The only 'Opcode'
 -- that uses more than one byte is 'PUSH'. Sizes are trivially determined
 -- for only 'Opcode' with unlabelled jumps, since we cannot know e.g. where
--- the label of a 'LabelledOpcode' points to before code generation has
--- completed.
+-- the label of a 'EVM.Opcode.LabelledOpcode' points to before code generation
+-- has completed.
 opcodeSize :: Num i => Opcode -> i
 opcodeSize (PUSH n) = List.genericLength . uncurry (:) $ push' n
 opcodeSize _opcode = 1

@@ -10,9 +10,9 @@
 -- opcodes with labelled jumps. Plain Ethereum VM Opcodes are not so ergonomic
 -- because one has to know the exact byte offset of the target 'JUMPDEST'.
 --
--- With 'Opcode' the byte offset is pushed to the stack via 'PUSH', but the
--- offset to the 'JUMPDEST' depends on all occurrences of 'PUSH' prior to
--- the label, including the 'PUSH' to the label itself.
+-- With 'EVM.Opcode.Opcode' the byte offset is pushed to the stack via 'PUSH',
+-- but the offset to the 'JUMPDEST' depends on all occurrences of 'PUSH' prior
+-- to the label, including the 'PUSH' to the label itself.
 
 module EVM.Opcode.Labelled
   ( Label
@@ -58,7 +58,7 @@ data TranslateError = TranslateError
 -- positional jump depends on the address being jumped to.
 --
 -- For example, if jumping to the 'JUMPDEST' on the 256th position in a
--- @['LabelledOpcode']@, this requires a 'PUSH2' instruction which uses an
+-- @['LabelledOpcode']@, this requires a @PUSH2@ instruction which uses an
 -- additional byte, which pushes the 'JUMPDEST' one byte ahead.
 
 translate :: [LabelledOpcode] -> Either TranslateError [PositionalOpcode]

@@ -25,8 +25,8 @@ import Prelude hiding (EQ, GT, LT)
 
 -- | An 'Opcode'' is an Ethereum VM Opcode with parameterised jumps.
 --
--- For a plain opcode using the basic EVM stack-based jumps, use 'Opcode'
--- instead.
+-- For a plain opcode using the basic EVM stack-based jumps, use
+-- 'EVM.Opcode.Opcode' instead.
 --
 -- This type is used for defining and translating from annotated opcodes, e.g.
 -- with labelled jumps.
@@ -185,10 +185,10 @@ data Ord16
   | Ord16_16
   deriving (Eq, Ord, Enum, Bounded)
 
--- | An 'OpcodeSpec' for a given 'Opcode' contains the numeric encoding of the
--- opcode, the number of items that this opcode removes from the stack (α),
--- and the number of items added to the stack (δ). These values are documented
--- in the Ethereum Yellow Paper.
+-- | An 'OpcodeSpec' for a given 'EVM.Opcode.Opcode' contains the numeric
+-- encoding of the opcode, the number of items that this opcode removes
+-- from the stack (α), and the number of items added to the stack (δ).
+-- These values are documented in the Ethereum Yellow Paper.
 --
 -- Examples of 'OpcodeSpec's:
 --

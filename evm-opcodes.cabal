@@ -77,7 +77,6 @@ benchmark bench
       Paths_evm_opcodes
   hs-source-dirs:
       bench
-  ghc-options: -O2
   build-depends:
       base >=4.12 && <5
     , bytestring >=0.10

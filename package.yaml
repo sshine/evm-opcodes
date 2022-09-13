@@ -58,4 +58,4 @@ benchmarks:
     dependencies:
       - evm-opcodes
       - tasty-bench
-    ghc-options: -O2
+    # ghc-options: -O2

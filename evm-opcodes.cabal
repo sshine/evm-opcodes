@@ -12,7 +12,7 @@ category:       Ethereum, Finance, Network
 homepage:       https://github.com/sshine/evm-opcodes
 bug-reports:    https://github.com/sshine/evm-opcodes/issues
 author:         Simon Shine
-maintainer:     shreddedglory@gmail.com
+maintainer:     simon@simonshine.dk
 copyright:      2018-2022 Simon Shine
 license:        MIT
 license-file:   LICENSE

@@ -1,6 +1,10 @@
 # evm-opcodes
 
-[![Haskell CI Status](https://github.com/sshine/evm-opcodes/workflows/Haskell%20CI/badge.svg)](https://github.com/sshine/evm-opcodes/actions?query=workflow%3A%22Haskell+CI%22)
+[![MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+[![Hackage](https://img.shields.io/hackage/v/evm-opcodes.svg?style=flat)](https://hackage.haskell.org/package/evm-opcodes)
+[![Stackage Nightly](http://stackage.org/package/evm-opcodes/badge/nightly)](http://stackage.org/nightly/package/evm-opcodes)
+[![Stackage LTS](http://stackage.org/package/evm-opcodes/badge/lts)](http://stackage.org/lts/package/evm-opcodes)
+[![Haskell CI](https://github.com/sshine/evm-opcodes/actions/workflows/haskell.yml/badge.svg)](https://github.com/sshine/evm-opcodes/actions/workflows/haskell.yml)
 
 This Haskell library provides opcode types for the Ethereum Virtual Machine (EVM).
 

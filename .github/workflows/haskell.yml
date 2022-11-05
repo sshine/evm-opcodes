@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: haskell/actions/setup@v1
+      - uses: haskell/actions/setup@968e175ff94d685b6ce0bb39b02447cca8b4a6bb # v2.0.1, 2022-08-15
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
@@ -42,8 +42,8 @@ jobs:
       - run: cabal install tasty-discover
       - run: cabal build $CONFIG
       - run: cabal test $CONFIG --test-show-details=always
-      - uses: haskell/actions/hlint-setup@v1
-      - uses: haskell/actions/hlint-run@v1
+      - uses: haskell/actions/hlint-setup@968e175ff94d685b6ce0bb39b02447cca8b4a6bb # v2.0.1, 2022-08-15
+      - uses: haskell/actions/hlint-run@968e175ff94d685b6ce0bb39b02447cca8b4a6bb # v2.0.1, 2022-08-15
         with:
           path: src/
           fail-on: warning

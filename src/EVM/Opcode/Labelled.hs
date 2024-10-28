@@ -2,7 +2,7 @@
 
 -- |
 -- Module: EVM.Opcode.Labelled
--- Copyright: 2018-2022 Simon Shine
+-- Copyright: 2018-2024 Simon Shine
 -- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --

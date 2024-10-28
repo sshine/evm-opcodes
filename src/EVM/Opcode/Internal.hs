@@ -6,7 +6,7 @@
 
 -- |
 -- Module: EVM.Opcode.Internal
--- Copyright: 2018-2022 Simon Shine
+-- Copyright: 2018-2024 Simon Shine
 -- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --
@@ -61,8 +61,8 @@ data Opcode' j
   | SHR               -- ^ 0x1c, https://eips.ethereum.org/EIPS/eip-145
   | SAR               -- ^ 0x1d, https://eips.ethereum.org/EIPS/eip-145
 
-  -- 20s: SHA3
-  | SHA3              -- ^ 0x20
+  -- 20s: KECCAK256
+  | KECCAK256         -- ^ 0x20, https://eips.ethereum.org/EIPS/eip-1803
 
   -- 30s: Environmental Information
   | ADDRESS           -- ^ 0x30
@@ -87,10 +87,11 @@ data Opcode' j
   | COINBASE          -- ^ 0x41
   | TIMESTAMP         -- ^ 0x42
   | NUMBER            -- ^ 0x43
-  | DIFFICULTY        -- ^ 0x44
+  | PREVRANDAO        -- ^ 0x44, https://eips.ethereum.org/EIPS/eip-4399
   | GASLIMIT          -- ^ 0x45
   | CHAINID           -- ^ 0x46, https://eips.ethereum.org/EIPS/eip-1344
   | SELFBALANCE       -- ^ 0x47, https://eips.ethereum.org/EIPS/eip-1884
+  | BASEFEE           -- ^ 0x48, https://eips.ethereum.org/EIPS/eip-3198
 
   -- 50s: Stack, Memory, Storage and Flow Operations
   | POP               -- ^ 0x50
@@ -241,9 +242,9 @@ opcodeSpec opcode = case opcode of
   SHR        -> OpcodeSpec 0x1c 2 1 "shr"
   SAR        -> OpcodeSpec 0x1d 2 1 "sar"
 
-  -- 20s: SHA3
+  -- 20s: KECCAK256
   --               Hex  α δ
-  SHA3       -> OpcodeSpec 0x20 2 1 "sha3"
+  KECCAK256  -> OpcodeSpec 0x20 2 1 "keccak256"
 
   -- 30s: Environmental Information
   --     Opcode            Hex  α δ
@@ -270,10 +271,11 @@ opcodeSpec opcode = case opcode of
   COINBASE       -> OpcodeSpec 0x41 0 1 "coinbase"
   TIMESTAMP      -> OpcodeSpec 0x42 0 1 "timestamp"
   NUMBER         -> OpcodeSpec 0x43 0 1 "number"
-  DIFFICULTY     -> OpcodeSpec 0x44 0 1 "difficulty"
+  PREVRANDAO     -> OpcodeSpec 0x44 0 1 "prevrandao"
   GASLIMIT       -> OpcodeSpec 0x45 0 1 "gaslimit"
   CHAINID        -> OpcodeSpec 0x46 0 1 "chainid"
   SELFBALANCE    -> OpcodeSpec 0x47 0 1 "selfbalance"
+  BASEFEE        -> OpcodeSpec 0x48 0 1 "basefee"
 
   -- 50s: Stack, Memory, Storage and Flow Operations
   --                    Hex  α δ
@@ -357,6 +359,12 @@ push' i | i < 256 = (0x60, [fromIntegral i])
 push' i = (opcode + 1, arg <> [fromIntegral i])
   where
     (opcode, arg) = push' (i `shift` (-8))
+
+-- | Provide both 'SHA3' and 'KECCAK256' patterns for backwards-compatibility
+-- 
+-- Note that 'KECCAK256' replaces 'SHA3' because it is more precise.
+pattern SHA3 :: forall j. Opcode' j
+pattern SHA3 = KECCAK256
 
 -- | Use 'DUP1' instead of @'DUP' 'Ord16_1'@.
 pattern DUP1 :: forall j. Opcode' j

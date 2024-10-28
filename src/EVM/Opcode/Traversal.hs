@@ -2,7 +2,7 @@
 
 -- |
 -- Module: EVM.Opcode.Traversal
--- Copyright: 2018-2022 Simon Shine
+-- Copyright: 2018-2024 Simon Shine
 -- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --
@@ -67,8 +67,8 @@ mapOpcodeM mapper opcode = case opcode of
   SHR     -> mapOnOther' SHR SHR
   SAR     -> mapOnOther' SAR SAR
 
-  -- 20s: SHA3
-  SHA3 -> mapOnOther' SHA3 SHA3
+  -- 20s: KECCAK256
+  KECCAK256 -> mapOnOther' KECCAK256 KECCAK256
 
   -- 30s: Environmental Information
   ADDRESS        -> mapOnOther' ADDRESS ADDRESS
@@ -93,10 +93,11 @@ mapOpcodeM mapper opcode = case opcode of
   COINBASE    -> mapOnOther' COINBASE COINBASE
   TIMESTAMP   -> mapOnOther' TIMESTAMP TIMESTAMP
   NUMBER      -> mapOnOther' NUMBER NUMBER
-  DIFFICULTY  -> mapOnOther' DIFFICULTY DIFFICULTY
+  PREVRANDAO  -> mapOnOther' PREVRANDAO PREVRANDAO
   GASLIMIT    -> mapOnOther' GASLIMIT GASLIMIT
   CHAINID     -> mapOnOther' CHAINID CHAINID
   SELFBALANCE -> mapOnOther' SELFBALANCE SELFBALANCE
+  BASEFEE     -> mapOnOther' BASEFEE BASEFEE
 
   -- 50s: Stack, Memory, Storage and Flow Operations
   POP       -> mapOnOther' POP POP

@@ -1,6 +1,6 @@
 -- |
 -- Module: EVM.Opcode.Positional
--- Copyright: 2018-2022 Simon Shine
+-- Copyright: 2018-2024 Simon Shine
 -- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --

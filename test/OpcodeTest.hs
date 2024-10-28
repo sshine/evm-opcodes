@@ -177,8 +177,8 @@ spec_Show_for_Opcode =
     it "shows SHR" $ show' SHR `shouldBe` "SHR"
     it "shows SAR" $ show' SAR `shouldBe` "SAR"
 
-    -- 20s: SHA3
-    it "shows SHA3" $ show' SHA3 `shouldBe` "SHA3"
+    -- 20s: KECCAK256
+    it "shows KECCAK256" $ show' KECCAK256 `shouldBe` "KECCAK256"
 
     -- 30s: Environmental Information
     it "shows ADDRESS" $ show' ADDRESS `shouldBe` "ADDRESS"
@@ -203,10 +203,11 @@ spec_Show_for_Opcode =
     it "shows COINBASE" $ show' COINBASE `shouldBe` "COINBASE"
     it "shows TIMESTAMP" $ show' TIMESTAMP `shouldBe` "TIMESTAMP"
     it "shows NUMBER" $ show' NUMBER `shouldBe` "NUMBER"
-    it "shows DIFFICULTY" $ show' DIFFICULTY `shouldBe` "DIFFICULTY"
+    it "shows PREVRANDAO" $ show' PREVRANDAO `shouldBe` "PREVRANDAO"
     it "shows GASLIMIT" $ show' GASLIMIT `shouldBe` "GASLIMIT"
     it "shows CHAINID" $ show' CHAINID `shouldBe` "CHAINID"
     it "shows SELFBALANCE" $ show' SELFBALANCE `shouldBe` "SELFBALANCE"
+    it "shows BASEFEE" $ show' BASEFEE `shouldBe` "BASEFEE"
 
     -- 50s: Stack, Memory, Storage and Flow Operations
     it "shows POP" $ show' POP `shouldBe` "POP"

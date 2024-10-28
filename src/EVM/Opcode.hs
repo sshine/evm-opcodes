@@ -2,7 +2,7 @@
 
 -- |
 -- Module: EVM.Opcode
--- Copyright: 2018-2022 Simon Shine
+-- Copyright: 2018-2024 Simon Shine
 -- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --
@@ -204,8 +204,8 @@ readOp word bs
     0x1c -> pure SHR
     0x1d -> pure SAR
 
-    -- 20s: SHA3
-    0x20 -> pure SHA3
+    -- 20s: KECCAK256
+    0x20 -> pure KECCAK256
 
     -- 30s: Environmental Information
     0x30 -> pure ADDRESS
@@ -230,10 +230,11 @@ readOp word bs
     0x41 -> pure COINBASE
     0x42 -> pure TIMESTAMP
     0x43 -> pure NUMBER
-    0x44 -> pure DIFFICULTY
+    0x44 -> pure PREVRANDAO
     0x45 -> pure GASLIMIT
     0x46 -> pure CHAINID
     0x47 -> pure SELFBALANCE
+    0x48 -> pure BASEFEE
 
     -- 50s: Stack, Memory, Storage and Flow Operations
     0x50 -> pure POP

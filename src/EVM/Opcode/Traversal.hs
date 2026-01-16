@@ -98,6 +98,8 @@ mapOpcodeM mapper opcode = case opcode of
   CHAINID     -> mapOnOther' CHAINID CHAINID
   SELFBALANCE -> mapOnOther' SELFBALANCE SELFBALANCE
   BASEFEE     -> mapOnOther' BASEFEE BASEFEE
+  BLOBHASH    -> mapOnOther' BLOBHASH BLOBHASH
+  BLOBBASEFEE -> mapOnOther' BLOBBASEFEE BLOBBASEFEE
 
   -- 50s: Stack, Memory, Storage and Flow Operations
   POP       -> mapOnOther' POP POP
@@ -109,8 +111,12 @@ mapOpcodeM mapper opcode = case opcode of
   PC        -> mapOnOther' PC PC
   MSIZE     -> mapOnOther' MSIZE MSIZE
   GAS       -> mapOnOther' GAS GAS
+  TLOAD     -> mapOnOther' TLOAD TLOAD
+  TSTORE    -> mapOnOther' TSTORE TSTORE
+  MCOPY     -> mapOnOther' MCOPY MCOPY
 
-  -- 60s & 70s: Push Operations
+  -- 5f, 60s & 70s: Push Operations
+  PUSH0     -> mapOnOther' PUSH0 PUSH0
   PUSH n    -> mapOnOther' (PUSH n) (PUSH n)
 
   -- 80s: Duplication Operations (DUP)

@@ -92,6 +92,8 @@ data Opcode' j
   | CHAINID           -- ^ 0x46, https://eips.ethereum.org/EIPS/eip-1344
   | SELFBALANCE       -- ^ 0x47, https://eips.ethereum.org/EIPS/eip-1884
   | BASEFEE           -- ^ 0x48, https://eips.ethereum.org/EIPS/eip-3198
+  | BLOBHASH          -- ^ 0x49, https://eips.ethereum.org/EIPS/eip-4844
+  | BLOBBASEFEE       -- ^ 0x4a, https://eips.ethereum.org/EIPS/eip-7516
 
   -- 50s: Stack, Memory, Storage and Flow Operations
   | POP               -- ^ 0x50
@@ -106,8 +108,12 @@ data Opcode' j
   | MSIZE             -- ^ 0x59
   | GAS               -- ^ 0x5a
   | JUMPDEST j        -- ^ 0x5b
+  | TLOAD             -- ^ 0x5c, https://eips.ethereum.org/EIPS/eip-1153
+  | TSTORE            -- ^ 0x5d, https://eips.ethereum.org/EIPS/eip-1153
+  | MCOPY             -- ^ 0x5e, https://eips.ethereum.org/EIPS/eip-5656
 
-  -- 60s & 70s: Push Operations
+  -- 5f, 60s & 70s: Push Operations
+  | PUSH0             -- ^ 0x5f, https://eips.ethereum.org/EIPS/eip-3855
   | PUSH !Word256     -- ^ 0x60 - 0x7f (PUSH1 - PUSH32)
 
   -- 80s: Duplication Operations (DUP)
@@ -276,6 +282,8 @@ opcodeSpec opcode = case opcode of
   CHAINID        -> OpcodeSpec 0x46 0 1 "chainid"
   SELFBALANCE    -> OpcodeSpec 0x47 0 1 "selfbalance"
   BASEFEE        -> OpcodeSpec 0x48 0 1 "basefee"
+  BLOBHASH       -> OpcodeSpec 0x49 1 1 "blobhash"
+  BLOBBASEFEE    -> OpcodeSpec 0x4a 0 1 "blobbasefee"
 
   -- 50s: Stack, Memory, Storage and Flow Operations
   --                    Hex  α δ
@@ -291,8 +299,12 @@ opcodeSpec opcode = case opcode of
   MSIZE          -> OpcodeSpec 0x59 0 1 "msize"
   GAS            -> OpcodeSpec 0x5a 0 1 "gas"
   JUMPDEST{}     -> OpcodeSpec 0x5b 0 0 "jumpdest"
+  TLOAD          -> OpcodeSpec 0x5c 1 1 "tload"
+  TSTORE         -> OpcodeSpec 0x5d 2 0 "tstore"
+  MCOPY          -> OpcodeSpec 0x5e 3 0 "mcopy"
 
-  -- 60s & 70s: Push Operations
+  -- 5f, 60s & 70s: Push Operations
+  PUSH0          -> OpcodeSpec 0x5f 0 1 "push0"
   PUSH n ->
     let (pushHex, pushConst) = push' n
     in OpcodeSpec { opcodeEncoding = pushHex

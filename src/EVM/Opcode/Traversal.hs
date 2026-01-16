@@ -2,7 +2,7 @@
 
 -- |
 -- Module: EVM.Opcode.Traversal
--- Copyright: 2018-2024 Simon Shine
+-- Copyright: 2018-2026 Simon Shine
 -- Maintainer: Simon Shine <simon@simonshine.dk>
 -- License: MIT
 --

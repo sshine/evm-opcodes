@@ -16,9 +16,8 @@ jobs:
         cabal:
           - "3.12"
         ghc:
-          - "9.6"
-          - "9.4"
-          - "9.2"
+          - "9.12"
+          - "9.10"
     env:
       CONFIG: "--enable-tests --enable-benchmarks"
 

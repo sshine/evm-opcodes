@@ -23,7 +23,7 @@ module EVM.Opcode.Labelled
   ) where
 
 import Data.Function (fix)
-import Data.List (foldl', group, sort)
+import Data.List (group, sort)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Maybe (mapMaybe)

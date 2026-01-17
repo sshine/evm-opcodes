@@ -20,7 +20,7 @@ dependencies:
   - cereal                     ^>= 0.5
   - data-dword                 ^>= 0.3
   - containers                  >= 0.6 && < 0.9
-  - text                        >= 1.2
+  - text                        >= 1.2 && < 2.2
 
 library:
   exposed-modules:

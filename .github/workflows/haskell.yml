@@ -76,6 +76,14 @@ jobs:
       - name: Generate sdist
         run: cabal sdist
 
+      - name: Upload sdist artifact
+        if: matrix.ghc == '9.12' && startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0, 2025-12-12
+        with:
+          name: sdist
+          path: dist-newstyle/sdist/evm-opcodes-*.tar.gz
+          retention-days: 1
+
   release:
     name: Release to Hackage
     runs-on: ubuntu-latest
@@ -83,20 +91,15 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1, 2025-12-02
+      - name: Download sdist artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0, 2025-12-12
+        with:
+          name: sdist
 
       - name: Setup Haskell
         uses: haskell-actions/setup@dc63c94789664bb2910876ec3dfeeaa24d23b96b # v2.10.2, 2026-01-11
         with:
-          ghc-version: "9.10"
           cabal-version: "3.16"
 
-      - name: Update Cabal
-        run: cabal update
-
-      - name: Generate sdist
-        run: cabal sdist
-
       - name: Upload to Hackage
-        run: cabal upload --publish --token "${{ secrets.HACKAGE_TOKEN }}" dist-newstyle/sdist/evm-opcodes-*.tar.gz
+        run: cabal upload --publish --token "${{ secrets.HACKAGE_TOKEN }}" evm-opcodes-*.tar.gz

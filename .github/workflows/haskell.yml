@@ -79,7 +79,9 @@ jobs:
         run: cabal haddock $CONFIG
 
       - name: Generate sdist
-        run: cabal sdist
+        run: |
+          rm -rf dist-newstyle/sdist/
+          cabal sdist
 
       - name: Upload sdist artifact
         if: matrix.ghc == '9.12' && startsWith(github.ref, 'refs/tags/v')

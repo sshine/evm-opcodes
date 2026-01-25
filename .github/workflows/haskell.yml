@@ -110,3 +110,9 @@ jobs:
 
       - name: Upload to Hackage
         run: cabal upload --publish --token "${{ secrets.HACKAGE_TOKEN }}" evm-opcodes-*.tar.gz
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0, 2025-12-01
+        with:
+          files: evm-opcodes-*.tar.gz
+          generate_release_notes: true

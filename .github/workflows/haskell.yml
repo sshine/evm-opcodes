@@ -36,6 +36,12 @@ jobs:
       - name: Update Cabal
         run: cabal update
 
+      - name: Check cabal file is in sync
+        if: matrix.ghc == '9.12'
+        run: |
+          cabal install hpack
+          .github/hooks/check-cabal-sync.sh
+
       - name: Freeze Cabal
         run: cabal freeze $CONFIG
 

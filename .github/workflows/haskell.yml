@@ -13,12 +13,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        cabal:
-          - "3.16"
-        ghc:
-          - "9.12"
     env:
       CONFIG: "--enable-tests --enable-benchmarks"
 
@@ -26,93 +20,57 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1, 2025-12-02
 
-      - name: Setup Haskell
-        uses: haskell-actions/setup@dc63c94789664bb2910876ec3dfeeaa24d23b96b # v2.10.2, 2026-01-11
+      - uses: nixbuild/nix-quick-install-action@2c9db80fb984ceb1bcaa77cdda3fdf8cfba92035 # v34, 2025-09-24
         with:
-          ghc-version: ${{ matrix.ghc }}
-          cabal-version: ${{ matrix.cabal }}
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
 
-      - name: Update Cabal
-        run: cabal update
-
-      - name: Check cabal file is in sync
-        if: matrix.ghc == '9.12'
-        run: |
-          cabal install hpack
-          .github/hooks/check-cabal-sync.sh
-
-      - name: Freeze Cabal
-        run: cabal freeze $CONFIG
-
-      - name: Setup Cache
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1, 2025-12-12
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@106bba72ed8e29c8357661199511ef07790175e9 # v7, 2026-01-08
         with:
-          path: |
-            ~/.cabal/store
-            dist-newstyle
-          key: ${{ runner.os }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.ghc }}-
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-last-accessed: P1DT12H
+          purge-primary-key: never
 
-      - name: Install tasty-discover
-        run: cabal install tasty-discover
+      - name: Build Nix dev shell
+        run: nix develop -c true
+
+      - name: Check cabal file version is in sync
+        run: nix develop -c .github/hooks/check-cabal-sync.sh
 
       - name: Build source code
-        run: cabal build $CONFIG
+        run: nix develop -c cabal build $CONFIG
 
       - name: Test
-        run: cabal test $CONFIG --test-show-details=always
-
-      - name: Setup HLint
-        uses: haskell-actions/hlint-setup@fe9cd1cd1af94a23900c06738e73f6ddb092966a # v2.4.10, 2024-06-20
+        run: nix develop -c cabal test $CONFIG --test-show-details=always
 
       - name: Run HLint
-        uses: haskell-actions/hlint-run@eaca4cfbf4a69f4eb875df38b6bc3e1657020378 # v2.4.10, 2024-06-20
-        with:
-          path: src/
-          fail-on: warning
+        run: nix develop -c hlint src/
 
       - name: Run benchmarks
-        run: cabal bench $CONFIG
+        run: nix develop -c cabal bench $CONFIG
 
       - name: Generate Haddock
-        run: cabal haddock $CONFIG
+        run: nix develop -c cabal haddock $CONFIG
 
-      - name: Generate sdist
+      - name: Generate sdist for package release
         run: |
           rm -rf dist-newstyle/sdist/
-          cabal sdist
-
-      - name: Upload sdist artifact
-        if: matrix.ghc == '9.12' && startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0, 2025-12-12
-        with:
-          name: sdist
-          path: dist-newstyle/sdist/evm-opcodes-*.tar.gz
-          retention-days: 1
-
-  release:
-    name: Release to Hackage
-    runs-on: ubuntu-latest
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    steps:
-      - name: Download sdist artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0, 2025-12-12
-        with:
-          name: sdist
-
-      - name: Setup Haskell
-        uses: haskell-actions/setup@dc63c94789664bb2910876ec3dfeeaa24d23b96b # v2.10.2, 2026-01-11
-        with:
-          cabal-version: "3.16"
+          nix develop -c cabal sdist
 
       - name: Upload to Hackage
-        run: cabal upload --publish --token "${{ secrets.HACKAGE_TOKEN }}" evm-opcodes-*.tar.gz
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: nix develop -c cabal upload --publish --token "${{ secrets.HACKAGE_TOKEN }}" dist-newstyle/sdist/evm-opcodes-*.tar.gz
 
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0, 2025-12-01
         with:
-          files: evm-opcodes-*.tar.gz
+          files: dist-newstyle/sdist/evm-opcodes-*.tar.gz
           generate_release_notes: true

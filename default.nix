@@ -1,6 +1,4 @@
-let
-  # Use nixpkgs available on the system
-  pkgs = import <nixpkgs> {};
+{ pkgs, ... }: let
   haskellDependencies = with pkgs.haskellPackages; [
     stack
     cabal-install
@@ -16,15 +14,5 @@ let
     root = ./.;
     modifier = drv: addBuildTools drv haskellDependencies;
   };
-
-  # Extend the build environment with pre-commit installed and activated
-  withPreCommitHook = old: {
-    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.pre-commit ];
-    shellHook = (old.shellHook or "") + ''
-      if [ -d .git ]; then
-        pre-commit install --hook-type pre-push
-      fi
-    '';
-  };
 in
-  package.overrideAttrs withPreCommitHook
+  package

@@ -235,6 +235,8 @@ readOp word bs
     0x46 -> pure CHAINID
     0x47 -> pure SELFBALANCE
     0x48 -> pure BASEFEE
+    0x49 -> pure BLOBHASH
+    0x4a -> pure BLOBBASEFEE
 
     -- 50s: Stack, Memory, Storage and Flow Operations
     0x50 -> pure POP
@@ -249,6 +251,10 @@ readOp word bs
     0x59 -> pure MSIZE
     0x5a -> pure GAS
     0x5b -> pure jumpdest
+    0x5c -> pure TLOAD
+    0x5d -> pure TSTORE
+    0x5e -> pure MCOPY
+    0x5f -> pure PUSH0
 
     -- f0s: System Operations
     0xf0 -> pure CREATE

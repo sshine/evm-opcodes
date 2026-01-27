@@ -8,10 +8,11 @@ import           Data.Char (isSpace)
 import qualified Data.ByteString as BS
 import           Data.DoubleWord (Word256)
 import           Data.Foldable (for_)
-import           Data.List (permutations)
-import           Data.Maybe (mapMaybe)
+import           Data.List (permutations, sort)
+import           Data.Maybe (isNothing, mapMaybe)
 import           Data.Text (Text)
 import qualified Data.Text as Text
+import           Data.Word (Word8)
 
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
@@ -64,6 +65,21 @@ hprop_pack_readOp_inverses = property $ do
   -- Property: 'pack' and 'readOp' are inverses.
   opcode2 <- evalMaybe (readOp c cs)
   opcode1 === opcode2
+
+-- Property: 'opcode1' covers all single-byte non-jump opcodes that 'readOp' handles.
+-- Uses 'Bounded' on 'Word8' to enumerate all possible byte values, ensuring that
+-- when new opcodes are added to 'readOp', they must also be added to 'opcode1'.
+hprop_opcode1_complete :: Property
+hprop_opcode1_complete = withTests 1 $ property $ do
+  let readOpOpcodes =
+        [ op
+        | byte <- [minBound..maxBound :: Word8]
+        , Just op <- [readOp byte BS.empty]
+        , opcodeSize op == 1
+        , isNothing (jumpAnnot op)
+        , isNothing (jumpdestAnnot op)
+        ]
+  sort (map Opcode.concrete opcode1) === sort readOpOpcodes
 
 hprop_translate_LabelledOpcode :: Property
 hprop_translate_LabelledOpcode = withTests 10000 $ property $ do
@@ -208,6 +224,8 @@ spec_Show_for_Opcode =
     it "shows CHAINID" $ show' CHAINID `shouldBe` "CHAINID"
     it "shows SELFBALANCE" $ show' SELFBALANCE `shouldBe` "SELFBALANCE"
     it "shows BASEFEE" $ show' BASEFEE `shouldBe` "BASEFEE"
+    it "shows BLOBHASH" $ show' BLOBHASH `shouldBe` "BLOBHASH"
+    it "shows BLOBBASEFEE" $ show' BLOBBASEFEE `shouldBe` "BLOBBASEFEE"
 
     -- 50s: Stack, Memory, Storage and Flow Operations
     it "shows POP" $ show' POP `shouldBe` "POP"
@@ -222,6 +240,12 @@ spec_Show_for_Opcode =
     it "shows MSIZE" $ show' MSIZE `shouldBe` "MSIZE"
     it "shows GAS" $ show' GAS `shouldBe` "GAS"
     it "shows JUMPDEST" $ show' (JUMPDEST ()) `shouldBe` "JUMPDEST ()"
+    it "shows TLOAD" $ show' TLOAD `shouldBe` "TLOAD"
+    it "shows TSTORE" $ show' TSTORE `shouldBe` "TSTORE"
+    it "shows MCOPY" $ show' MCOPY `shouldBe` "MCOPY"
+
+    -- 5f: PUSH0
+    it "shows PUSH0" $ show' PUSH0 `shouldBe` "PUSH0"
 
     -- 60s & 70s: Push Operations
     for_ [0, 255, 256, 65535, 65536] $ \i ->

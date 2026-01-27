@@ -1,5 +1,5 @@
 name:         evm-opcodes
-version:      0.3.2
+version:      0.3.3
 synopsis:     'Opcode types for Ethereum Virtual Machine (EVM)'
 description:  'This library provides opcode types for the Ethereum Virtual Machine.'
 category:     Ethereum, Finance, Network

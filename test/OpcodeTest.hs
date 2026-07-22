@@ -192,6 +192,7 @@ spec_Show_for_Opcode =
     it "shows SHL" $ show' SHL `shouldBe` "SHL"
     it "shows SHR" $ show' SHR `shouldBe` "SHR"
     it "shows SAR" $ show' SAR `shouldBe` "SAR"
+    it "shows CLZ" $ show' CLZ `shouldBe` "CLZ"
 
     -- 20s: KECCAK256
     it "shows KECCAK256" $ show' KECCAK256 `shouldBe` "KECCAK256"

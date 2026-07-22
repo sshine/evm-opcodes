@@ -60,6 +60,7 @@ data Opcode' j
   | SHL               -- ^ 0x1b, https://eips.ethereum.org/EIPS/eip-145
   | SHR               -- ^ 0x1c, https://eips.ethereum.org/EIPS/eip-145
   | SAR               -- ^ 0x1d, https://eips.ethereum.org/EIPS/eip-145
+  | CLZ               -- ^ 0x1e, https://eips.ethereum.org/EIPS/eip-7939
 
   -- 20s: KECCAK256
   | KECCAK256         -- ^ 0x20, https://eips.ethereum.org/EIPS/eip-1803
@@ -247,6 +248,7 @@ opcodeSpec opcode = case opcode of
   SHL        -> OpcodeSpec 0x1b 2 1 "shl"
   SHR        -> OpcodeSpec 0x1c 2 1 "shr"
   SAR        -> OpcodeSpec 0x1d 2 1 "sar"
+  CLZ        -> OpcodeSpec 0x1e 1 1 "clz"
 
   -- 20s: KECCAK256
   --               Hex  α δ

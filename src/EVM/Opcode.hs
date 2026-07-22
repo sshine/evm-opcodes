@@ -203,6 +203,7 @@ readOp word bs
     0x1b -> pure SHL
     0x1c -> pure SHR
     0x1d -> pure SAR
+    0x1e -> pure CLZ
 
     -- 20s: KECCAK256
     0x20 -> pure KECCAK256

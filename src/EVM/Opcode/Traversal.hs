@@ -66,6 +66,7 @@ mapOpcodeM mapper opcode = case opcode of
   SHL     -> mapOnOther' SHL SHL
   SHR     -> mapOnOther' SHR SHR
   SAR     -> mapOnOther' SAR SAR
+  CLZ     -> mapOnOther' CLZ CLZ
 
   -- 20s: KECCAK256
   KECCAK256 -> mapOnOther' KECCAK256 KECCAK256

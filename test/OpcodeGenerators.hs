@@ -81,7 +81,7 @@ genOpcodeN = Gen.frequency
 opcode1 :: [Opcode' a]
 opcode1 =
   [ STOP, ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, ADDMOD, MULMOD, EXP, SIGNEXTEND
-  , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE, SHL, SHR, SAR
+  , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE, SHL, SHR, SAR, CLZ
   , KECCAK256
 
   , ADDRESS, BALANCE, ORIGIN

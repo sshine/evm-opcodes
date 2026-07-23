@@ -41,21 +41,29 @@ jobs:
           rm -rf dist-newstyle/sdist/
           nix develop -c cabal sdist all
 
-      - name: Package Rust crate
-        run: nix develop -c cargo package -p evm-opcodes
-
       - name: Upload to Hackage
         run: nix develop -c cabal upload --publish --token "${{ secrets.HACKAGE_TOKEN }}" dist-newstyle/sdist/evm-opcodes-*.tar.gz
 
-      - name: Publish to crates.io
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: nix develop -c cargo publish -p evm-opcodes
+      # crates.io publishing is disabled until a crate name is chosen: the name
+      # "evm-opcodes" (and "evm-opcode") is already taken. To re-enable, pick a
+      # name, set it in rust/evm-opcodes/Cargo.toml, add the CARGO_REGISTRY_TOKEN
+      # repository secret (currently absent), and restore the two steps below and
+      # the target/package/*.crate release artifact.
+      #
+      # Available crate-name candidates (checked on crates.io):
+      #   evm-opcode-rs, evm-opcode-types, evm-isa, evm-ops, evm-asm
+      #
+      # - name: Package Rust crate
+      #   run: nix develop -c cargo package -p evm-opcodes
+      #
+      # - name: Publish to crates.io
+      #   env:
+      #     CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      #   run: nix develop -c cargo publish -p evm-opcodes
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0, 2025-12-01
         with:
           files: |
             dist-newstyle/sdist/evm-opcodes-*.tar.gz
-            target/package/evm-opcodes-*.crate
           generate_release_notes: true

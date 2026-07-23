@@ -1,31 +1,38 @@
 {
-  description = "Opcode types for Ethereum Virtual Machine (EVM)";
+  description = "Opcode types for the Ethereum Virtual Machine (EVM)";
+
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+
+    import-tree.url = "github:vic/import-tree";
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    hk-nix = {
+      url = "github:nix-tools/hk-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" "aarch64-darwin" ];
-      perSystem = { config, self', pkgs, ... }: let
-        package = import ./default.nix { inherit pkgs; };
-        buildTools = with pkgs.haskellPackages; [
-          stack
-          cabal-install
-          haskell-language-server
-          hlint
-          ghcid
-          hpack
-          tasty-discover
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      inputs.import-tree ./nix
+      // {
+        systems = [
+          "x86_64-linux"
+          "aarch64-linux"
+          "aarch64-darwin"
         ];
-      in {
-        packages.default = package;
-        devShells.default = pkgs.haskellPackages.shellFor {
-          packages = _: [ (pkgs.haskell.lib.doBenchmark package) ];
-          doBenchmark = true;
-          nativeBuildInputs = buildTools;
-        };
-      };
-    };
+      }
+    );
 }

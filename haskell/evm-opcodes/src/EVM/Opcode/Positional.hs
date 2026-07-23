@@ -13,7 +13,6 @@
 -- Ethereum contract must refer to the size of the code being copied, and
 -- determining the size of a jump is trivial when it's annotated with the
 -- destination address.
-
 module EVM.Opcode.Positional
   ( Position
   , PositionalOpcode
@@ -35,13 +34,13 @@ type PositionalOpcode = Opcode' Position
 -- into a 'PUSH' instruction.
 translate :: [PositionalOpcode] -> [Opcode]
 translate = concatMap inline
-  where
-    inline :: PositionalOpcode -> [Opcode]
-    inline (JUMP addr) = [ PUSH (fromIntegral addr), jump ]
-    inline (JUMPI addr) = [ PUSH (fromIntegral addr), jumpi ]
-    inline (JUMPDEST _) = [ jumpdest ]
-    inline opcode = [ concrete opcode ]
+ where
+  inline :: PositionalOpcode -> [Opcode]
+  inline (JUMP addr) = [PUSH (fromIntegral addr), jump]
+  inline (JUMPI addr) = [PUSH (fromIntegral addr), jumpi]
+  inline (JUMPDEST _) = [jumpdest]
+  inline opcode = [concrete opcode]
 
 -- | The size of a jump to some absolute position.
-jumpSize :: Num i => Position -> i
+jumpSize :: (Num i) => Position -> i
 jumpSize pos = opcodeSize (PUSH (fromIntegral pos)) + opcodeSize jump

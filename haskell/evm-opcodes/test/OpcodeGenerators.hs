@@ -1,22 +1,21 @@
-
 module OpcodeGenerators where
 
-import Prelude hiding (LT, EQ, GT)
+import Prelude hiding (EQ, GT, LT)
 
-import           Data.Bits (shift)
-import           Data.Containers.ListUtils (nubOrd)
-import           Data.DoubleWord (Word256)
-import           Data.Text (Text)
+import Data.Bits (shift)
+import Data.Containers.ListUtils (nubOrd)
+import Data.DoubleWord (Word256)
+import Data.Text (Text)
 import qualified Data.Text as Text
 
-import           Hedgehog
+import Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
-import           EVM.Opcode as Opcode
-import           EVM.Opcode.Positional
-import           EVM.Opcode.Labelled
-import           EVM.Opcode.Traversal
+import EVM.Opcode as Opcode
+import EVM.Opcode.Labelled
+import EVM.Opcode.Positional
+import EVM.Opcode.Traversal
 
 -- | Here are the three main strategies for generating testable opcodes:
 --
@@ -28,15 +27,16 @@ import           EVM.Opcode.Traversal
 --     all jumps are labelled and all jumps have valid jumpdests. Many jumps
 --     to the same jumpdest may occur, but the same jumpdest may not occur
 --     twice.
---
 
 -- | Generate any 'Opcode'.
 genOpcode :: Gen Opcode
-genOpcode = Opcode.concrete <$> Gen.frequency
-  [ (3, genOpcode'1)
-  , (1, genPushOpcode)
-  , (1, genJumpyOpcode)
-  ]
+genOpcode =
+  Opcode.concrete
+    <$> Gen.frequency
+      [ (3, genOpcode'1)
+      , (1, genPushOpcode)
+      , (1, genJumpyOpcode)
+      ]
 
 -- | Generate a jump-free 'Opcode'' of 'opcodeSize' 1.
 --
@@ -52,69 +52,136 @@ genLabelledOpcodes = do
   opcodes <- Gen.list (Range.linear 0 40) genLabelledOpcode
   let jumpdests = JUMPDEST <$> (nubOrd . foldMap extractLabel) opcodes
   Gen.shuffle (opcodes <> jumpdests)
-  where
-    extractLabel :: LabelledOpcode -> [Label]
-    extractLabel (JUMP label) = [label]
-    extractLabel (JUMPI label) = [label]
-    extractLabel _ = []
+ where
+  extractLabel :: LabelledOpcode -> [Label]
+  extractLabel (JUMP label) = [label]
+  extractLabel (JUMPI label) = [label]
+  extractLabel _ = []
 
 -- | Generate a 'LabelledOpcode' that isn't 'JUMPDEST'.
 genLabelledOpcode :: Gen LabelledOpcode
-genLabelledOpcode = Gen.frequency
-  [ (3, genOpcode'1)
-  , (1, genPushOpcode)
-  , (1, genLabelledJumpOpcode)
-  ]
+genLabelledOpcode =
+  Gen.frequency
+    [ (3, genOpcode'1)
+    , (1, genPushOpcode)
+    , (1, genLabelledJumpOpcode)
+    ]
 
 -- | Generate any jump-free 'Opcode''.
 --
 -- That means, no 'JUMP', 'JUMPI', 'JUMPDEST'.
 genOpcodeN :: Gen (Opcode' a)
-genOpcodeN = Gen.frequency
-  [ (length opcode1, genOpcode'1)
-  , (1, genPushOpcode)
-  ]
+genOpcodeN =
+  Gen.frequency
+    [ (length opcode1, genOpcode'1)
+    , (1, genPushOpcode)
+    ]
 
 -- | A list of opcodes of byte size 1.
 --
 -- That means, no 'JUMP', 'JUMPI', 'JUMPDEST' or 'PUSH'.
 opcode1 :: [Opcode' a]
 opcode1 =
-  [ STOP, ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, ADDMOD, MULMOD, EXP, SIGNEXTEND
-  , LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, NOT, BYTE, SHL, SHR, SAR, CLZ
+  [ STOP
+  , ADD
+  , MUL
+  , SUB
+  , DIV
+  , SDIV
+  , MOD
+  , SMOD
+  , ADDMOD
+  , MULMOD
+  , EXP
+  , SIGNEXTEND
+  , LT
+  , GT
+  , SLT
+  , SGT
+  , EQ
+  , ISZERO
+  , AND
+  , OR
+  , XOR
+  , NOT
+  , BYTE
+  , SHL
+  , SHR
+  , SAR
+  , CLZ
   , KECCAK256
-
-  , ADDRESS, BALANCE, ORIGIN
-  , CALLER, CALLVALUE, CALLDATALOAD, CALLDATASIZE, CALLDATACOPY
-  , CODESIZE, CODECOPY
-  , GASPRICE, EXTCODESIZE, EXTCODECOPY, RETURNDATASIZE, RETURNDATACOPY, EXTCODEHASH
-
-  , BLOCKHASH, COINBASE, TIMESTAMP, NUMBER, PREVRANDAO, GASLIMIT, CHAINID, SELFBALANCE, BASEFEE
-  , BLOBHASH, BLOBBASEFEE
-
-  , POP, MLOAD, MSTORE, MSTORE8, SLOAD, SSTORE {- , JUMP, JUMPI -}, PC, MSIZE, GAS {- , JUMPDEST -}
-  , TLOAD, TSTORE, MCOPY
+  , ADDRESS
+  , BALANCE
+  , ORIGIN
+  , CALLER
+  , CALLVALUE
+  , CALLDATALOAD
+  , CALLDATASIZE
+  , CALLDATACOPY
+  , CODESIZE
+  , CODECOPY
+  , GASPRICE
+  , EXTCODESIZE
+  , EXTCODECOPY
+  , RETURNDATASIZE
+  , RETURNDATACOPY
+  , EXTCODEHASH
+  , BLOCKHASH
+  , COINBASE
+  , TIMESTAMP
+  , NUMBER
+  , PREVRANDAO
+  , GASLIMIT
+  , CHAINID
+  , SELFBALANCE
+  , BASEFEE
+  , BLOBHASH
+  , BLOBBASEFEE
+  , POP
+  , MLOAD
+  , MSTORE
+  , MSTORE8
+  , SLOAD
+  , SSTORE {- , JUMP, JUMPI -}
+  , PC
+  , MSIZE
+  , GAS {- , JUMPDEST -}
+  , TLOAD
+  , TSTORE
+  , MCOPY
   , PUSH0 {- , PUSH -}
-  , CREATE, CALL, CALLCODE, RETURN, DELEGATECALL, CREATE2, STATICCALL, REVERT, INVALID, SELFDESTRUCT
-  ] <> map DUP [minBound..maxBound]
-    <> map SWAP [minBound..maxBound]
-    <> map LOG [minBound..maxBound]
+  , CREATE
+  , CALL
+  , CALLCODE
+  , RETURN
+  , DELEGATECALL
+  , CREATE2
+  , STATICCALL
+  , REVERT
+  , INVALID
+  , SELFDESTRUCT
+  ]
+    <> map DUP [minBound .. maxBound]
+    <> map SWAP [minBound .. maxBound]
+    <> map LOG [minBound .. maxBound]
 
 genPushOpcode :: Gen (Opcode' a)
 genPushOpcode = PUSH <$> genWord256
 
 genJumpyOpcode :: Gen Opcode
-genJumpyOpcode = Gen.element
-  [ jump
-  , jumpi
-  , jumpdest
-  ]
+genJumpyOpcode =
+  Gen.element
+    [ jump
+    , jumpi
+    , jumpdest
+    ]
 
 genLabelledJumpOpcode :: Gen LabelledOpcode
-genLabelledJumpOpcode = Gen.choice
-  [ JUMP <$> genLabel
-  , JUMPI <$> genLabel
-  ]
+genLabelledJumpOpcode =
+  Gen.choice
+    [ JUMP <$> genLabel
+    , JUMPI <$> genLabel
+    ]
 
 genLabel :: Gen Label
 genLabel = Gen.text (Range.singleton 5) (Gen.element "aeiomnr")

@@ -2,27 +2,27 @@
 
 module OpcodeTest where
 
-import Prelude hiding (LT, EQ, GT)
+import Prelude hiding (EQ, GT, LT)
 
-import           Data.Char (isSpace)
 import qualified Data.ByteString as BS
-import           Data.DoubleWord (Word256)
-import           Data.Foldable (for_)
-import           Data.List (permutations, sort)
-import           Data.Maybe (isNothing, mapMaybe)
-import           Data.Text (Text)
+import Data.Char (isSpace)
+import Data.DoubleWord (Word256)
+import Data.Foldable (for_)
+import Data.List (permutations, sort)
+import Data.Maybe (isNothing, mapMaybe)
+import Data.Text (Text)
 import qualified Data.Text as Text
-import           Data.Word (Word8)
+import Data.Word (Word8)
 
-import           Hedgehog
+import Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import           Test.Tasty.Hspec
-import           Test.Hspec
+import Test.Hspec
+import Test.Tasty.Hspec
 
 import EVM.Opcode as Opcode
-import EVM.Opcode.Positional as P
 import EVM.Opcode.Labelled as L
+import EVM.Opcode.Positional as P
 
 import OpcodeGenerators
 
@@ -73,7 +73,7 @@ hprop_opcode1_complete :: Property
 hprop_opcode1_complete = withTests 1 $ property $ do
   let readOpOpcodes =
         [ op
-        | byte <- [minBound..maxBound :: Word8]
+        | byte <- [minBound .. maxBound :: Word8]
         , Just op <- [readOp byte BS.empty]
         , opcodeSize op == 1
         , isNothing (jumpAnnot op)
@@ -98,7 +98,7 @@ hprop_translate_LabelledOpcode = withTests 10000 $ property $ do
   let opcodes = P.translate positionalOpcodes
   let bytecode = Opcode.pack opcodes
   for_ (fromIntegral <$> positions) $ \pos ->
-    [ bytecode `BS.index` pos ] === toBytes jumpdest
+    [bytecode `BS.index` pos] === toBytes jumpdest
 
 -- Negative tests to assert that broken labels don't cause infinite recursion
 
@@ -135,11 +135,11 @@ spec_EVM_Opcode_Labelled = do
 
     it "fails on multiple duplicate destinations" $
       let instructions = [JUMPDEST "foo", JUMPDEST "bar", JUMPDEST "foo", JUMPDEST "bar"]
-      in L.translate instructions `shouldDupErr` ["bar", "foo"]
+       in L.translate instructions `shouldDupErr` ["bar", "foo"]
 
     it "fails and reports both jumps without destinations and duplicate destinations" $
       let instructions = [JUMP "foo", JUMPDEST "bar", JUMPDEST "bar"]
-      in L.translate instructions `shouldBe` Left (TranslateError ["foo"] ["bar"])
+       in L.translate instructions `shouldBe` Left (TranslateError ["foo"] ["bar"])
 
     it "fails and reports multiple jumps without destination and multiple duplicate destinations" $
       let instructions =
@@ -155,10 +155,9 @@ spec_EVM_Opcode_Labelled = do
             , JUMPDEST "y"
             , JUMPDEST "good"
             ]
-          wildJumps = [ "a", "b", "c", "d" ]
-          duplicateDests = [ "x", "y" ]
-
-      in L.translate instructions `shouldBe` Left (TranslateError wildJumps duplicateDests)
+          wildJumps = ["a", "b", "c", "d"]
+          duplicateDests = ["x", "y"]
+       in L.translate instructions `shouldBe` Left (TranslateError wildJumps duplicateDests)
 
 spec_Show_for_Opcode :: Spec
 spec_Show_for_Opcode =
@@ -253,17 +252,17 @@ spec_Show_for_Opcode =
       it ("shows PUSH " <> show i) $ show' (PUSH i) `shouldBe` "PUSH " <> show i
 
     -- 80s: Duplication Operations (DUP)
-    for_ [minBound..maxBound] $ \nth -> do
+    for_ [minBound .. maxBound] $ \nth -> do
       let i = fromEnum nth + 1
       it ("shows DUP" <> show i) $ show' (DUP nth) `shouldBe` ("DUP" <> show i)
 
     -- 90s: Exchange operations (SWAP)
-    for_ [minBound..maxBound] $ \nth -> do
+    for_ [minBound .. maxBound] $ \nth -> do
       let i = fromEnum nth + 1
       it ("shows DUP" <> show i) $ show' (SWAP nth) `shouldBe` ("SWAP" <> show i)
 
     -- a0s: Logging Operations (LOG)
-    for_ [minBound..maxBound] $ \nth -> do
+    for_ [minBound .. maxBound] $ \nth -> do
       let i = fromEnum nth
       it ("shows DUP" <> show i) $ show' (LOG nth) `shouldBe` ("LOG" <> show i)
 
@@ -278,9 +277,9 @@ spec_Show_for_Opcode =
     it "shows REVERT" $ show' REVERT `shouldBe` "REVERT"
     it "shows INVALID" $ show' INVALID `shouldBe` "INVALID"
     it "shows SELFDESTRUCT" $ show' SELFDESTRUCT `shouldBe` "SELFDESTRUCT"
-  where
-    show' :: Opcode -> String
-    show' = show
+ where
+  show' :: Opcode -> String
+  show' = show
 
 shouldMissErr :: (Show b, Eq b) => Either TranslateError b -> [Label] -> Expectation
 shouldMissErr x y = x `shouldBe` Left (TranslateError y [])

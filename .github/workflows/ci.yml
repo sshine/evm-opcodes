@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1, 2025-12-02
+
+      - uses: nixbuild/nix-quick-install-action@2c9db80fb984ceb1bcaa77cdda3fdf8cfba92035 # v34, 2025-09-24
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@106bba72ed8e29c8357661199511ef07790175e9 # v7, 2026-01-08
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/Cargo.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 2G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-last-accessed: P1DT12H
+          purge-primary-key: never
+
+      - name: Build Nix dev shell
+        run: nix develop -c true
+
+      - name: Check versions are in sync
+        run: nix develop -c just sync
+
+      - name: Check formatting
+        run: nix develop -c just fmt-check
+
+      - name: Lint
+        run: nix develop -c just lint
+
+      - name: Test
+        run: nix develop -c just test
+
+      - name: Build
+        run: nix develop -c just build
+
+      - name: Documentation
+        run: nix develop -c just doc
+
+      - name: Benchmarks
+        run: nix develop -c just bench

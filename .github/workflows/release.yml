@@ -1,20 +1,13 @@
-name: Haskell CI
+name: Release
 
 on:
   push:
-    branches:
-      - main
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-    env:
-      CONFIG: "--enable-tests --enable-benchmarks"
 
     steps:
       - name: Checkout
@@ -29,48 +22,40 @@ jobs:
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@106bba72ed8e29c8357661199511ef07790175e9 # v7, 2026-01-08
         with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/Cargo.lock') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
-          gc-max-store-size-linux: 1G
+          gc-max-store-size-linux: 2G
           purge: true
           purge-prefixes: nix-${{ runner.os }}-
           purge-created: 0
           purge-last-accessed: P1DT12H
           purge-primary-key: never
 
-      - name: Build Nix dev shell
-        run: nix develop -c true
+      # Gate the release on the same checks CI runs, and assert the tag matches
+      # both package versions (GITHUB_REF is read by scripts/check-sync.sh).
+      - name: Build, test and version-check
+        run: nix develop -c just ci
 
-      - name: Check cabal file version is in sync
-        run: nix develop -c .github/hooks/check-cabal-sync.sh
-
-      - name: Build source code
-        run: nix develop -c cabal build $CONFIG
-
-      - name: Test
-        run: nix develop -c cabal test $CONFIG --test-show-details=always
-
-      - name: Run HLint
-        run: nix develop -c hlint src/
-
-      - name: Run benchmarks
-        run: nix develop -c cabal bench $CONFIG
-
-      - name: Generate Haddock
-        run: nix develop -c cabal haddock $CONFIG
-
-      - name: Generate sdist for package release
+      - name: Generate Haskell sdist
         run: |
           rm -rf dist-newstyle/sdist/
-          nix develop -c cabal sdist
+          nix develop -c cabal sdist all
+
+      - name: Package Rust crate
+        run: nix develop -c cargo package -p evm-opcodes
 
       - name: Upload to Hackage
-        if: startsWith(github.ref, 'refs/tags/v')
         run: nix develop -c cabal upload --publish --token "${{ secrets.HACKAGE_TOKEN }}" dist-newstyle/sdist/evm-opcodes-*.tar.gz
 
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: nix develop -c cargo publish -p evm-opcodes
+
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0, 2025-12-01
         with:
-          files: dist-newstyle/sdist/evm-opcodes-*.tar.gz
+          files: |
+            dist-newstyle/sdist/evm-opcodes-*.tar.gz
+            target/package/evm-opcodes-*.crate
           generate_release_notes: true

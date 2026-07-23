@@ -22,3 +22,13 @@ cabal.project.local~
 .ghc.environment.*
 .idea/
 .direnv/
+
+# Rust
+/target/
+
+# Nix
+result
+result-*
+
+# hk-nix generated hook config (symlinked in by the devshell)
+hk.pkl

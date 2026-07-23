@@ -4,17 +4,24 @@
 [![Hackage](https://img.shields.io/hackage/v/evm-opcodes.svg?style=flat)](https://hackage.haskell.org/package/evm-opcodes)
 [![Stackage Nightly](http://stackage.org/package/evm-opcodes/badge/nightly)](http://stackage.org/nightly/package/evm-opcodes)
 [![Stackage LTS](http://stackage.org/package/evm-opcodes/badge/lts)](http://stackage.org/lts/package/evm-opcodes)
-[![Haskell CI](https://github.com/sshine/evm-opcodes/actions/workflows/haskell.yml/badge.svg)](https://github.com/sshine/evm-opcodes/actions/workflows/haskell.yml)
+[![CI](https://github.com/sshine/evm-opcodes/actions/workflows/ci.yml/badge.svg)](https://github.com/sshine/evm-opcodes/actions/workflows/ci.yml)
 
-This Haskell library provides opcode types for the Ethereum Virtual Machine (EVM).
+This repository provides opcode types for the Ethereum Virtual Machine (EVM) as
+two sibling packages that mirror each other and are released in lockstep:
+
+- **Haskell** — `haskell/evm-opcodes/`, published to [Hackage](https://hackage.haskell.org/package/evm-opcodes).
+- **Rust** — `rust/evm-opcodes/`, not yet published to crates.io (crate name to be decided).
+
+The remainder of this document describes the Haskell library; the Rust crate is
+a faithful port with the same API.
 
 The library has one parameterised type, `Opcode' j` where `j` is the annotation
 for the jump-related instructions `JUMP`, `JUMPI` and `JUMPDEST`, and it has
 three concrete variants:
 
- - `type Opcode = Opcode' ()`
- - `type PositionalOpcode = Opcode' Word`
- - `type LabelledOpcode = Opcode' Text`
+- `type Opcode = Opcode' ()`
+- `type PositionalOpcode = Opcode' Word`
+- `type LabelledOpcode = Opcode' Text`
 
 The library has a fixpoint algorithm that translates labelled jumps into
 positional jumps, and it has another function that translates those positional
@@ -25,8 +32,7 @@ on the constant that is pushed, hence the need for fixpoint iteration.
 
 When pushing a constant to the stack, EVM uses `push0`, `push1`, `push2`, ...,
 `push32` where the number 0-32 refers to how many bytes the constant occupies.
-Instead of having 32 unique push commands, this library has a single `PUSH
-!Word256` constructor that serializes to the right `push1`, `push2`, etc.
+Instead of having 32 unique push commands, this library has a single `PUSH !Word256` constructor that serializes to the right `push1`, `push2`, etc.
 
 ## Example
 
@@ -60,7 +66,7 @@ Right ["push1 1","jumpdest","dup1","iszero","push1 14","jumpi","push1 2","mul","
 
 EVM's `jump` and `jumpi` instructions are parameterless. Instead they pop and
 jump to the address on the top of the stack. In order to perform absolute jumps
-in the code, it is necessary to `PUSH` an address on the stack first.  This is
+in the code, it is necessary to `PUSH` an address on the stack first. This is
 inconvenient, and so `PositionalOpcode` and `LabelledOpcode` are easier to use.
 
 But what's more inconvenient is what happens to the offset of an absolute jump

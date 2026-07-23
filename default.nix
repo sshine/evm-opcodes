@@ -1,3 +1,3 @@
 { pkgs, ... }:
 
-pkgs.haskellPackages.callCabal2nix "evm-opcodes" ./. {}
+pkgs.haskellPackages.callCabal2nix "evm-opcodes" ./haskell/evm-opcodes { }

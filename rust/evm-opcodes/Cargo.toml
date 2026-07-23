@@ -1,0 +1,24 @@
+[package]
+name = "evm-opcodes"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+description = "Opcode types for the Ethereum Virtual Machine (EVM)"
+readme = "../../README.md"
+categories = ["cryptography::cryptocurrencies", "encoding"]
+keywords = ["ethereum", "evm", "opcode", "bytecode"]
+
+[lib]
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+ruint.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

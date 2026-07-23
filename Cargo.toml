@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = ["rust/*"]
+
+[workspace.package]
+version = "0.4.0"
+edition = "2024"
+license = "MIT"
+authors = ["Simon Shine <simon@simonshine.dk>"]
+homepage = "https://github.com/sshine/evm-opcodes"
+repository = "https://github.com/sshine/evm-opcodes"
+
+[workspace.lints.rust]
+unused_must_use = "deny"
+
+[workspace.dependencies]
+ruint = "1"
+proptest = "1"
